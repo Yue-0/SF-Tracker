@@ -1,0 +1,64 @@
+<launch>
+    <!-- Map size -->
+    <arg name="size" value="800" />
+
+    <!-- Control intervel -->
+    <arg name="dt" value="0.1" />
+
+    <!-- Frames -->
+    <arg name="map_frame" value="map" />
+    <arg name="odom_frame" value="odom" />
+    <arg name="lidar_frame" value="laser1" />
+    <arg name="robot_frame" value="base_link" />
+    <node name="robot2map" pkg="tf" type="static_transform_publisher"
+          args="-8 -8 0 0 0 0 $(arg robot_frame) $(arg map_frame) 100"/>
+
+    <!-- Costmap -->
+    <node name="costmap" pkg="sf_tracker" type="costmap" output="screen" >
+        <param name="expansion" value="40" type="int" />
+        <param name="scale" value="0.01" type="double" />
+        <param name="width" value="$(arg size)" type="int" />
+        <param name="height" value="$(arg size)" type="int" />
+        <param name="map_frame" value="$(arg map_frame)" type="string" />
+        <param name="robot_frame" value="$(arg robot_frame)" type="string" />
+        <param name="lidar_frame" value="$(arg lidar_frame)" type="string" />
+    </node>
+
+    <!-- Path planner -->
+    <node name="planner" pkg="sf_tracker" type="planner" output="screen" >
+        <!-- Kinetic limit -->
+        <param name="max_vel" value="2.5" type="double" />
+        <param name="max_acc" value="1.5" type="double" />
+        
+        <!-- Hyperparameters -->
+        <param name="delta_t" value="$(arg dt)" type="double" />
+        <param name="safe_distance" value="0.4" type="double" />
+        <param name="lambda_distance" value="100.0" type="double" />
+        <param name="lambda_feasibility" value="0.01" type="double" />
+        <param name="lambda_smoothness" value="0.000001" type="double" />
+
+        <!-- Frame name -->
+        <param name="map_frame" value="$(arg map_frame)" type="string" />
+        <param name="odom_frame" value="$(arg odom_frame)" type="string" />
+
+        <!-- Other settings -->
+        <param name="replan_interval" value="0.05" type="double" />
+        <param name="solution_time_limit" value="0.01" type="double" />
+    </node>
+
+    <!-- Velocity controller -->
+    <node name="controller" pkg="sf_tracker" type="controller" output="screen" >
+        <!-- Kinetic limit -->
+        <param name="max_vel_omiga" value="1.5" type="double" />
+        <param name="max_acc_omiga" value="1.0" type="double" />
+
+        <!-- Hyperparameters -->
+        <param name="delta_t" value="$(arg dt)" type="double" />
+        <param name="lambda_angle" value="10.0" type="double" />
+        <param name="lambda_feasibility" value="1" type="double" />
+        <param name="lambda_smoothness" value="0.1" type="double" />
+
+        <!-- Other settings -->
+        <param name="solution_time_limit" value="0.01" type="double" />
+    </node>
+</launch>

@@ -1,0 +1,16 @@
+<launch>
+
+    <!-- Run simulator -->
+    <include file="$(find simulator)/launch/sim.launch" />
+
+    <!-- Motion planning algorithm -->
+    <include file="$(find sf_tracker)/launch/planning.launch" />
+
+    <!-- Fake tracker -->
+    <node name="tracker" pkg="simulator" type="target" />
+
+    <!-- Show Rviz -->
+    <node name="rviz" pkg="rviz" type="rviz"
+          args="-d $(find simulator)/rviz/rviz.rviz" />
+
+</launch>

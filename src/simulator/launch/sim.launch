@@ -1,0 +1,31 @@
+<launch>
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+		<arg name="gui" value="true" />
+		<arg name="debug" value="false" />
+		<arg name="paused" value="false" />
+		<arg name="headless" value="false"/>
+		<arg name="use_sim_time" value="true"/>
+		<arg name="world_name" value="$(find simulator)/world/map.world"/>
+	</include>
+  
+	<rosparam file="$(find simulator)/config/config.yaml" command="load"/>
+	<param name="robot_description"
+		   command="$(find xacro)/xacro '$(find simulator)/urdf/car.xacro'" />
+    
+	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+          output="screen" ns="/mobile_base" args="joint_state_controller" />
+  
+	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" respawn="false"
+		  args="-unpause -urdf -param robot_description -model pioneer -x 0.5 -y 0.9" />
+
+	<node name="robot_state_publisher"
+		  pkg="robot_state_publisher" 
+		  type="robot_state_publisher" >
+		<param name="publish_frequency" type="double" value="30.0" />
+	</node>
+
+	<node name="joint_state_publisher"
+		  pkg="joint_state_publisher" 
+		  type="joint_state_publisher" />
+
+</launch>

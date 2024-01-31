@@ -1,0 +1,5 @@
+numpy
+torch
+pyrealsense2
+opencv-python
+onnxruntime-gpu

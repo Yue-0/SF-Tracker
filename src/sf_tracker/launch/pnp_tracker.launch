@@ -1,0 +1,16 @@
+<launch>
+    <node name="pnp_tracker" pkg="sf_tracker" type="controller" output="screen" >
+        <!-- Kinetic limit -->
+        <param name="max_vel_omiga" value="1.5" type="double" />
+        <param name="max_acc_omiga" value="1.0" type="double" />
+
+        <!-- Hyperparameters -->
+        <param name="delta_t" value="0.1" type="double" />
+        <param name="lambda_angle" value="10.0" type="double" />
+        <param name="lambda_feasibility" value="1" type="double" />
+        <param name="lambda_smoothness" value="0.1" type="double" />
+
+        <!-- Other settings -->
+        <param name="solution_time_limit" value="0.01" type="double" />
+    </node>
+</launch>
