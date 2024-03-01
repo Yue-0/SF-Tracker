@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<robot name="tracker" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:arg name="car_name" default="tracker" />
+    <xacro:arg name="car_namespace" default="sf_tracker" />
+    <xacro:include filename="$(find simulator)/urdf/link.xacro" />
+    <xacro:robot/>
+    <xacro:include filename="$(find simulator)/urdf/driver.gazebo" />
+    <xacro:robot_gazebo/>
+</robot>

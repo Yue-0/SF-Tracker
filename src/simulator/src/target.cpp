@@ -5,7 +5,7 @@
 #include "geometry_msgs/PoseStamped.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
 
-#define ROS_INIT ros::init(argc, argv, "fake_tracker")
+#define ROS_INIT ros::init(argc, argv, "fake_target")
 
 typedef geometry_msgs::PoseStamped Target;
 typedef geometry_msgs::PoseWithCovarianceStamped Pose;

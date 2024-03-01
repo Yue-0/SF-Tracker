@@ -353,23 +353,27 @@ namespace sf_tracker
         double vm2 = pow2(opt->max_vel), am2 = pow2(opt->max_acc);
         double t = opt->t; double t2 = 1 / t / t; double t4 = pow2(t2);
         for(int i = 0; i < n + 5; i++)
-            for(int z = 0; z < 2; z++)
-                if((cost = pow2(vel[i][z]) * t2 - vm2) > 0)
+            if((cost = (pow2(vel[i][0]) + pow2(vel[i][1])) * t2 - vm2) > 0)
+            {
+                j += opt->lambda1 * cost;
+                for(int z = 0; z < 2; z++)
                 {
-                    j += opt->lambda1 * cost;
                     g = 2 * opt->lambda1 * vel[i][z] * t2;
                     gradient[i][z] -= g; gradient[i + 1][z] += g;
                 }
+            }
         for(int i = 0; i < n + 4; i++)
-            for(int z = 0; z < 2; z++)
-                if((cost = pow2(acc[i][z]) * t4 - am2) > 0)
+            if((cost = (pow2(acc[i][0]) + pow2(acc[i][1])) * t4 - am2) > 0)
+            {
+                j += opt->lambda1 * cost;
+                for(int z = 0; z < 2; z++)
                 {
-                    j += opt->lambda1 * cost;
                     g = 2 * opt->lambda1 * acc[i][z] * t4;
-                    gradient[i][z] += g;
-                    gradient[i + 2][z] += g;
                     gradient[i + 1][z] -= 2 * g;
+                    gradient[i + 2][z] += g;
+                    gradient[i][z] += g;
                 }
+            }
         /* Smoothness Cost */
         double t6 = t2 * t4;
         for(int i = 0; i < n + 4; i++)
@@ -448,8 +452,8 @@ int main(int argc, char* argv[])
     path.header.frame_id = map_frame;
     dt = nh.param("replan_interval", 0.1);
     optimizer.t = nh.param("delta_t", 0.1);
-    optimizer.max_vel = nh.param("max_vel", 1.5);
-    optimizer.max_acc = nh.param("max_acc", 1.5);
+    optimizer.max_vel = nh.param("max_vel", 3.0);
+    optimizer.max_acc = nh.param("max_acc", 2.0);
     optimizer.safe = nh.param("safe_distance", 0.4);
     optimizer.lambda3 = nh.param("lambda_distance", 100.0);
     optimizer.lambda2 = nh.param("lambda_smoothness", 1e-6);

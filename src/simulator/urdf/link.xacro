@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
-<robot name="mecanum" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<robot name="robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <material name="blue">
         <color rgba="0 0 0.8 1"/>
@@ -21,8 +22,8 @@
         </inertial>
     </xacro:macro>
 
-    <xacro:macro name="mecanum">
-        <link name="base_footprint"/>
+    <xacro:macro name="robot">
+    	<link name="base_footprint"/>
         <link name="base_link">
             <inertial>
                 <mass value="15"/>
@@ -71,14 +72,14 @@
             <collision>
                 <origin xyz="0.02 0 0" rpy="0 1.57 0"/>
                 <geometry>
-                        <cylinder radius="0.06" length="0.04"/>
+                    <cylinder radius="0.06" length="0.04"/>
                 </geometry>
             </collision>
 
             <visual>
                 <origin xyz="0.02 0 0" rpy="0 1.57 0"/>
                 <geometry>
-                        <cylinder radius="0.06" length="0.04"/>
+                    <cylinder radius="0.06" length="0.04"/>
                 </geometry>
                 <material name="wheels">
                     <color rgba="0.6 0.6 0.6 1" />

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
-<robot name="base_mecanum_gazebo" xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:macro name="base_mecanum_gazebo">
+<robot name="robot_gazebo" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="robot_gazebo">
         <gazebo>
             <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
                 <robotNamespace>$(arg car_namespace)/$(arg car_name)</robotNamespace>
@@ -86,7 +86,7 @@
         </gazebo>
 
         <gazebo>
-            <plugin name="mecanum_controller" filename="libgazebo_ros_planar_move.so">
+            <plugin name="gazebo_controller" filename="libgazebo_ros_planar_move.so">
                 <commandTopic>cmd_vel</commandTopic>
                 <odometryTopic>odom</odometryTopic>
                 <odometryFrame>odom</odometryFrame>

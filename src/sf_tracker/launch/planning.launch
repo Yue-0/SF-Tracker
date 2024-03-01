@@ -27,15 +27,15 @@
     <!-- Path planner -->
     <node name="planner" pkg="sf_tracker" type="planner" output="screen" >
         <!-- Kinetic limit -->
-        <param name="max_vel" value="2.5" type="double" />
-        <param name="max_acc" value="1.5" type="double" />
+        <param name="max_vel" value="3.0" type="double" /> <!-- Real world: 2.0 -->
+        <param name="max_acc" value="2.0" type="double" /> <!-- Real world: 1.0 -->
         
         <!-- Hyperparameters -->
         <param name="delta_t" value="$(arg dt)" type="double" />
         <param name="safe_distance" value="0.4" type="double" />
         <param name="lambda_distance" value="100.0" type="double" />
-        <param name="lambda_feasibility" value="0.01" type="double" />
         <param name="lambda_smoothness" value="0.000001" type="double" />
+        <param name="lambda_feasibility" value="0.01" type="double" />
 
         <!-- Frame name -->
         <param name="map_frame" value="$(arg map_frame)" type="string" />
@@ -49,14 +49,15 @@
     <!-- Velocity controller -->
     <node name="controller" pkg="sf_tracker" type="controller" output="screen" >
         <!-- Kinetic limit -->
-        <param name="max_vel_omiga" value="1.5" type="double" />
-        <param name="max_acc_omiga" value="1.0" type="double" />
+        <param name="max_vel_omiga" value="2.0" type="double" /> <!-- Real world: 1.0 -->
+        <param name="max_acc_omiga" value="1.5" type="double" /> <!-- Real world: 1.0 -->
 
         <!-- Hyperparameters -->
+        <param name="distance" value="0.5" type="double" /> <!-- Real world: 1.0 -->
         <param name="delta_t" value="$(arg dt)" type="double" />
-        <param name="lambda_angle" value="10.0" type="double" />
-        <param name="lambda_feasibility" value="1" type="double" />
-        <param name="lambda_smoothness" value="0.1" type="double" />
+        <param name="lambda_angle" value="100.0" type="double" />
+        <param name="lambda_feasibility" value="0.01" type="double" />
+        <param name="lambda_smoothness" value="0.000001" type="double" />
 
         <!-- Other settings -->
         <param name="solution_time_limit" value="0.01" type="double" />

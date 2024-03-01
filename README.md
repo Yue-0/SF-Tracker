@@ -2,9 +2,9 @@
 
 __English__ | [简体中文](README_cn.md)
 
-Paper：[arXiv]()
+<!-- Paper：[arXiv]() -->
 
-Video：[Bilibili]()
+<!-- Video：[Bilibili]() -->
 
 ## Instruction for Use
 

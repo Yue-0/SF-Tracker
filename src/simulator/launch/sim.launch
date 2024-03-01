@@ -1,16 +1,11 @@
 <launch>
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">
-		<arg name="gui" value="true" />
-		<arg name="debug" value="false" />
-		<arg name="paused" value="false" />
-		<arg name="headless" value="false"/>
-		<arg name="use_sim_time" value="true"/>
 		<arg name="world_name" value="$(find simulator)/world/map.world"/>
 	</include>
   
 	<rosparam file="$(find simulator)/config/config.yaml" command="load"/>
 	<param name="robot_description"
-		   command="$(find xacro)/xacro '$(find simulator)/urdf/car.xacro'" />
+		   command="$(find xacro)/xacro '$(find simulator)/urdf/robot.xacro'" />
     
 	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
           output="screen" ns="/mobile_base" args="joint_state_controller" />

@@ -49,7 +49,7 @@ namespace sf_tracker
             double angle[0x2710];
             double lambda1, lambda2, lambda3;
             double max_vel, max_acc, vel = 0;
-            float max_time, dt, yaw, xt, yt, x = 0, y = 0;
+            float max_time, dist, dt, yaw, xt, yt, x = 0, y = 0;
         
         private:
             Velocity velocity;
@@ -66,7 +66,7 @@ namespace sf_tracker
             velocity.angular.z =
             vel = 0; return velocity;
         }
-        if(n * dt < 1)
+        if(n * dt < dist)
         {
             velocity.angular.z = max_vel * std::tanh(
                 sub(std::atan2(yt - y, xt - x), yaw)
@@ -108,7 +108,7 @@ namespace sf_tracker
     {
         int n = path.poses.size() - 1;
         angle[0] = yaw;
-        if(n * dt < 1)
+        if(n * dt < dist)
             return;
         Vector var(n - 1);
         for(int p = 1; p <= n; p++)
@@ -223,8 +223,9 @@ int main(int argc, char* argv[])
     ros::NodeHandle nh("~");
     sf_tracker::Controller controller;
     controller.dt = nh.param("delta_t", 1e-2);
-    controller.max_vel = nh.param("max_vel_omiga", 1.0);
-    controller.max_acc = nh.param("max_acc_omiga", 1.0);
+    controller.dist = nh.param("distance", 1.0);
+    controller.max_vel = nh.param("max_vel_omiga", 2.0);
+    controller.max_acc = nh.param("max_acc_omiga", 1.5);
     controller.lambda3 = nh.param("lambda_angle", 100.0);
     controller.lambda2 = nh.param("lambda_smoothness", 1e-6);
     controller.lambda1 = nh.param("lambda_feasibility", 1e-2);
