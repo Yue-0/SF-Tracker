@@ -20,19 +20,14 @@ namespace sf_tracker
     class OrientationPlanner
     {
         public:
-            Vector best;
+            Vector yaw;
             double p[0x400] = {0};
             double mu_f, mu_s, mu_v;
             float t, max_time, max_alpha, max_omega;
 
         public:
             OrientationPlanner(){}
-            Vector plan(const Vector&, double, double);
-        
-        private:
             Vector optimize(const Vector&);
-            Vector samples(const Vector&, double);
-            Vector bspline(const Vector&, double, double);
     };
 
     double objective(const Vector&, Vector&, void*);
