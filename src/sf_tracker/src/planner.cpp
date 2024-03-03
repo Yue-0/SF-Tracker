@@ -23,7 +23,7 @@
 #define TIME ros::Time::now().toSec()
 #define ROS_INIT ros::init(argc, argv, "planner")
 
-#define eq0(f) std::fabs(f) < 1e-6
+#define zero(f) std::fabs(f) < 1e-6
 #define path_push(x0, y0) do\
 {\
     geometry_msgs::PoseStamped pose;\
@@ -106,18 +106,17 @@ namespace sf_tracker
                 {
                     x = x0 + dx;
                     idx = encode(x, y, cols);
-                    if(x < 0 || x >= cols || !map.at<uchar>(y, x) || visited[idx])
-                        continue;
-                    int cost = g[index] + std::sqrt(distance2(x, y, end.x, end.y));
+                    if(x < 0 || x >= cols || !map.at<uchar>
+                       (y, x) || visited[idx]) continue;
+                    int cost = std::sqrt(
+                        distance2(x, y, end.x, end.y)
+                    ) + g[index];
                     if(cost < g[idx])
                     {
                         g[idx] = cost;
                         parent[idx] = index;
                         queue.push(std::make_pair(-F(cost, x, y, end), idx));
-                    }
-                }
-            }
-        }
+        }   }   }   }
         return Points();
     }
 
@@ -195,13 +194,16 @@ namespace sf_tracker
     {
         if(path.empty()) return path;
         std::thread thread([=, &map](){esdf(map);});
-        Points bsp = bspline(
+        Points b = bspline(
             samples(path), vel_x, vel_y, acc_x, acc_y
-        ); thread.join(); bsp = optimize(bsp);
-        if(bsp.size() <= 6) return bsp;
-        Points optimized; optimized.assign(
-            bsp.begin() + 2, bsp.end() - 2
-        ); return optimized;
+        ); thread.join(); b = optimize(b);
+        const int n = b.size() - 3;
+        if(n <= 1) return path; Points optimized;
+        for(int p = 1; p < n; p++)
+            optimized.push_back((
+                b[p] + 4 * b[p + 1] + b[p + 2]
+            ) / 6.0);
+        return optimized;
     }
 
     void TrajectoryOptimizer::esdf(const cv::Mat& map)
@@ -232,9 +234,9 @@ namespace sf_tracker
             x(i) = points[i].x; y(i) = points[i].y;
             matrix.block(i, i, 1, 3) = (1.0 / 6) * p.transpose();
         }
-        x(n) = vel_x * scale; y(n) = vel_y * scale;
+        x(n) = vel_x; y(n) = vel_y;
+        x(n + 2) = acc_x; y(n + 2) = acc_y;
         x(n + 1) = y(n + 1) = x(n + 3) = y(n + 3) = 0;
-        x(n + 2) = acc_x * scale; y(n + 2) = acc_y * scale;
         matrix.block(n, 0, 1, 3) = (0.5 / t) * v.transpose();
         matrix.block(n + 2, 0, 1, 3) = (1 / t / t) * a.transpose();
         matrix.block(n + 1, n - 1, 1, 3) = (0.5 / t) * v.transpose();
@@ -254,24 +256,20 @@ namespace sf_tracker
     {
         Points points;
         Point p0, p2, p1;
-        for(int p = 0; p < 2; p++)
-            points.push_back(p1 = keypoints[0]);
+        points.push_back(p1 = keypoints[0]);
         for(int p = 1; p < keypoints.size(); p1 = p2)
         {
-            float k, dt;
             p2 = keypoints[p++];
-            int num = std::round(std::sqrt(
+            double k, dt, step = max_vel / (std::sqrt(
                 distance2(p1.x, p1.y, p2.x, p2.y)
-            ) / (t * max_vel / scale));
-            if(num < 2) num = 2;
-            for(k = dt = 1.0 / num; k < 1 + dt; k += dt)
+            ) * scale) * t;
+            for(k = dt = std::min(step, 0.5); k < 1 + dt; k += dt)
             {
                 p0.x = std::round(k * p2.x + (1 - k) * p1.x);
                 p0.y = std::round(k * p2.y + (1 - k) * p1.y);
                 points.push_back(p0);
             }
         }
-        points.push_back(p0);
         return points;
     }
 
@@ -349,55 +347,53 @@ namespace sf_tracker
             jerk[i][0] = acc[i + 1][0] - acc[i][0];
             jerk[i][1] = acc[i + 1][1] - acc[i][1];
         }
+
         /* Feasibility Cost */
         double vm2 = pow2(opt->max_vel), am2 = pow2(opt->max_acc);
         double t = opt->t; double t2 = 1 / t / t; double t4 = pow2(t2);
         for(int i = 0; i < n + 5; i++)
-            if((cost = (pow2(vel[i][0]) + pow2(vel[i][1])) * t2 - vm2) > 0)
-            {
-                j += opt->lambda1 * cost;
-                for(int z = 0; z < 2; z++)
+            for(int z = 0; z < 2; z++)
+                if((cost = pow2(vel[i][z]) * t2 - vm2) > 0)
                 {
-                    g = 2 * opt->lambda1 * vel[i][z] * t2;
+                    j += opt->lambda_f * cost;
+                    g = 2 * opt->lambda_f * vel[i][z] * t2;
                     gradient[i][z] -= g; gradient[i + 1][z] += g;
                 }
-            }
         for(int i = 0; i < n + 4; i++)
-            if((cost = (pow2(acc[i][0]) + pow2(acc[i][1])) * t4 - am2) > 0)
-            {
-                j += opt->lambda1 * cost;
-                for(int z = 0; z < 2; z++)
+            for(int z = 0; z < 2; z++)
+                if((cost = pow2(acc[i][z]) * t4 - am2) > 0)
                 {
-                    g = 2 * opt->lambda1 * acc[i][z] * t4;
-                    gradient[i + 1][z] -= 2 * g;
-                    gradient[i + 2][z] += g;
+                    j += opt->lambda_f * cost;
+                    g = 2 * opt->lambda_f * acc[i][z] * t4;
                     gradient[i][z] += g;
+                    gradient[i + 2][z] += g;
+                    gradient[i + 1][z] -= 2 * g;
                 }
-            }
+
         /* Smoothness Cost */
         double t6 = t2 * t4;
         for(int i = 0; i < n + 4; i++)
             for(int z = 0; z < 2; z++)
             {
-                g = 2 * opt->lambda2 * acc[i][z] * t4;
+                g = 2 * opt->lambda_s * acc[i][z] * t4;
                 gradient[i][z] += g;
                 gradient[i + 2][z] += g;
                 gradient[i + 1][z] -= 2 * g;
-                j += opt->lambda2 * pow2(acc[i][z]) * t4;
+                j += opt->lambda_s * pow2(acc[i][z]) * t4;
             }
         for(int i = 0; i < n + 3; i++)
             for(int z = 0; z < 2; z++)
             {
-                g = 2 * opt->lambda2 * jerk[i][z] * t6;
+                g = 2 * opt->lambda_s * jerk[i][z] * t6;
                 gradient[i][z] -= g;
                 gradient[i + 3][z] += g;
                 gradient[i + 1][z] += 3 * g;
                 gradient[i + 2][z] -= 3 * g;
-                j += opt->lambda2 * pow2(jerk[i][z]) * t6;
+                j += opt->lambda_s * pow2(jerk[i][z]) * t6;
             }
-        /* Distance Cost */
+
+        /* Safety Cost */
         const cv::Mat esdf = opt->sdf;
-        double safe = std::sqrt(opt->safe);
         for(int i = 3; i < n + 3; i++)
         {
             int x = std::round(opt->q[i].x / opt->scale);
@@ -405,10 +401,10 @@ namespace sf_tracker
             x = std::max(std::min(x, esdf.cols - 2), 1);
             y = std::max(std::min(y, esdf.rows - 2), 1);
             double sqr = std::sqrt(esdf.at<float>(y, x));
-            if((cost = safe - sqr) >= 0)
+            if((cost = opt->safe - sqr) >= 0)
             {
-                j += opt->lambda3 * cost;
-                g = 0.25 * opt->lambda3 / sqr;
+                j += opt->lambda_d * cost;
+                g = 0.25 * opt->lambda_d / sqr;
                 gradient[i][0] += g * (
                     esdf.at<float>(y, x - 1) - esdf.at<float>(y, x + 1)
                 );
@@ -417,6 +413,7 @@ namespace sf_tracker
                 );
             }
         }
+
         /* Structural Gradient */
         for(int i = 0; i < n; i++)
         {
@@ -431,7 +428,6 @@ namespace sf_tracker
 int main(int argc, char* argv[])
 {
     ROS_INIT;
-    float dt;
     Path path;
     cv::Mat map;
     double scale;
@@ -443,43 +439,42 @@ int main(int argc, char* argv[])
     tf::TransformListener listener;
     sf_tracker::PathSearcher planner;
     std::string map_frame, odom_frame;
-    sf_tracker::Point cur(0, 0), tgt(0, 0);
+    sf_tracker::Point start(0, 0), end(0, 0);
     sf_tracker::TrajectoryOptimizer optimizer;
     if(!nh.getParam("map_frame", map_frame))
         ROS_ERROR("Missing parameter: map_frame");
     if(!nh.getParam("odom_frame", odom_frame))
         ROS_ERROR("Missing parameter: odom_frame");
     path.header.frame_id = map_frame;
-    dt = nh.param("replan_interval", 0.1);
     optimizer.t = nh.param("delta_t", 0.1);
-    optimizer.max_vel = nh.param("max_vel", 3.0);
-    optimizer.max_acc = nh.param("max_acc", 2.0);
-    optimizer.safe = nh.param("safe_distance", 0.4);
-    optimizer.lambda3 = nh.param("lambda_distance", 100.0);
-    optimizer.lambda2 = nh.param("lambda_smoothness", 1e-6);
-    optimizer.lambda1 = nh.param("lambda_feasibility", 1e-2);
+    optimizer.max_vel = nh.param("max_vel", 2.5);
+    optimizer.max_acc = nh.param("max_acc", 1.5);
+    optimizer.lambda_d = nh.param("lambda_safety", 1e2);
+    optimizer.lambda_s = nh.param("lambda_smoothness", 1e-6);
+    optimizer.lambda_f = nh.param("lambda_feasibility", 1e-2);
     optimizer.max_time = nh.param("solution_time_limit", 1e-2);
+    optimizer.safe = std::sqrt(nh.param("safe_distance", 0.4));
     float vel_x = 0, vel_y = 0, acc_x = 0, acc_y = 0, cmd_vel_time = 0;
     listener.waitForTransform(
         odom_frame, map_frame, ros::Time(0), ros::Duration(10)
     );
     ros::Publisher publisher = nh.advertise<Path>("/path", 1);
-    ros::Subscriber srv = nh.subscribe<geometry_msgs::PoseStamped>(
+    ros::Subscriber tracking = nh.subscribe<geometry_msgs::PoseStamped>(
         "/target", 1, [&target, &track, &optimizer]
         (geometry_msgs::PoseStamped::ConstPtr pos)
         {
-            if(eq0(optimizer.scale)) return;
+            if(zero(optimizer.scale)) return;
             target = pos->pose.position; track = true;
         }
     );
     ros::Subscriber scan = nh.subscribe<nav_msgs::OccupancyGrid>(
-        "/costmap", 1, [&map, &cur, &optimizer, &scale]
+        "/costmap", 1, [&map, &start, &optimizer, &scale]
         (nav_msgs::OccupancyGrid::ConstPtr costmap)
         {
             int h = costmap->info.height, w = costmap->info.width;
             optimizer.scale = costmap->info.resolution;
+            start.x = w >> 1; start.y = h >> 1;
             map = cv::Mat(h, w, CV_8UC1, 0xFF);
-            cur.x = w >> 1; cur.y = h >> 1;
             scale = 1 / optimizer.scale;
             for(int y = 0; y < h; y++)
             {
@@ -490,7 +485,7 @@ int main(int argc, char* argv[])
             }
         }
     );
-    ros::Subscriber vel_acc = nh.subscribe<geometry_msgs::Twist>(
+    ros::Subscriber kinetic = nh.subscribe<geometry_msgs::Twist>(
         "/cmd_vel", 1, [&vel_x, &vel_y, &acc_x, &acc_y, &cmd_vel_time]
         (geometry_msgs::Twist::ConstPtr cmd_vel)
         {
@@ -512,36 +507,28 @@ int main(int argc, char* argv[])
         }
     );
     ros::Timer planning = nh.createTimer(
-        ros::Duration(dt), [&](const ros::TimerEvent& _)
-        {
-            if(!track) return;
+        ros::Duration(nh.param("replan_interval", 0.1)),
+        [&](const ros::TimerEvent& _){
+            if(!track || (!start.x && !start.y))
+                return;
             listener.lookupTransform(
                 odom_frame, map_frame, ros::Time(0), transform
             );
-            double yaw = tf::getYaw(transform.getRotation()),
-            x = transform.getOrigin().x(), y = transform.getOrigin().y();
-            double sin = std::sin(yaw), cos = std::cos(yaw);
-            x = target.x - x; y = target.y - y;
-            tgt.x = std::round((x * cos + y * sin) * scale);
-            tgt.y = std::round((y * cos - x * sin) * scale);
-            tgt.x = std::max(std::min(tgt.x, map.rows - 1), 0);
-            tgt.y = std::max(std::min(tgt.y, map.cols - 1), 0);
-            if((!cur.x && !cur.y))
-            {
-                if(!path.poses.empty()){
-                    path.poses.clear();
-                    path_push(tgt.x, tgt.y);
-                    path_push(tgt.x, tgt.y);
-                    publisher.publish(path);
-                }   return;
-            }
             path.poses.clear();
             path.header.stamp = ros::Time::now();
+            tf::Vector3 origin = transform.getOrigin();
+            double yaw = tf::getYaw(transform.getRotation());
+            double sin = std::sin(yaw), cos = std::cos(yaw),
+            x = target.x - origin.x(), y = target.y - origin.y();
+            end.x = std::round((x * cos + y * sin) * scale);
+            end.y = std::round((y * cos - x * sin) * scale);
+            end.x = std::max(std::min(end.x, map.rows - 1), 0);
+            end.y = std::max(std::min(end.y, map.cols - 1), 0);
             for(sf_tracker::Point point: optimizer.plan(
-                map, planner.plan(map, cur, tgt),
+                map, planner.plan(map, start, end),
                 vel_x, vel_y, acc_x, acc_y
             )) path_push(point.x, point.y);
-               path_push(tgt.x, tgt.y);
+               path_push(end.x, end.y);
             publisher.publish(path);
         }
     );

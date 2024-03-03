@@ -21,12 +21,12 @@ include_directories(
     ${OpenCV_INCLUDE_DIRS}
 )
 
-add_executable(costmap src/costmap.cpp)
+add_executable(pnp_op src/pnp_op.cpp)
 add_executable(planner src/planner.cpp)
-add_executable(controller src/controller.cpp)
+add_executable(costmap src/costmap.cpp)
 
-target_link_libraries(costmap
-    ${OpenCV_LIBS}
+target_link_libraries(pnp_op
+    ${NLOPT_LIBRARIES}
     ${catkin_LIBRARIES}
 )
 target_link_libraries(planner
@@ -34,7 +34,7 @@ target_link_libraries(planner
     ${NLOPT_LIBRARIES}
     ${catkin_LIBRARIES}
 )
-target_link_libraries(controller
-    ${NLOPT_LIBRARIES}
+target_link_libraries(costmap
+    ${OpenCV_LIBS}
     ${catkin_LIBRARIES}
 )

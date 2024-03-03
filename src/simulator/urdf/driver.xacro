@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+
+<robot name="gazebo_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:macro name="gazebo_wheel" params="name" >
+        <gazebo reference="${name}">
+            <mu1>0</mu1>
+            <mu2>0</mu2>
+            <kd>10.0</kd>
+            <kp>200000.0</kp>
+            <maxVel>1.0</maxVel>
+            <minDepth>0.001</minDepth>
+        </gazebo>
+    </xacro:macro>
+
+    <gazebo>
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+            <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+        </plugin>
+    </gazebo>
+
+    <gazebo reference="base_link">
+        <material>Gazebo/Blue</material>
+    </gazebo>
+
+    <xacro:gazebo_wheel name="left_back_wheel" />
+    <xacro:gazebo_wheel name="left_front_wheel" />
+    <xacro:gazebo_wheel name="right_back_wheel" />
+    <xacro:gazebo_wheel name="right_front_wheel" />
+
+    <gazebo reference="laser1">
+        <sensor type="gpu_ray" name="head_hokuyo_sensor">
+            <pose>0 0 0 0 0 0</pose>
+            <visualize>false</visualize>
+            <update_rate>10</update_rate>
+            <ray>
+                <scan>
+                    <horizontal>
+                        <samples>360</samples>
+                        <resolution>1</resolution>
+                        <max_angle>3.141592653589793</max_angle>
+                        <min_angle>-3.141592653589793</min_angle>
+                    </horizontal>
+                </scan>
+                <range>
+                    <min>0.10</min>
+                    <max>30.0</max>
+                    <resolution>0.01</resolution>
+                </range>
+                <noise>
+                    <mean>0.0</mean>
+                    <type>gaussian</type>
+                    <stddev>0.01</stddev>
+                </noise>
+            </ray>
+            <plugin name="gazebo_ros_head_hokuyo_controller" 
+                    filename="libgazebo_ros_gpu_laser.so">
+                <topicName>/scan</topicName>
+                <frameName>laser1</frameName>
+            </plugin>
+        </sensor>
+    </gazebo>
+
+    <gazebo>
+        <plugin name="gazebo_controller" filename="libgazebo_ros_planar_move.so">
+            <odometryRate>60.0</odometryRate>
+            <odometryTopic>odom</odometryTopic>
+            <odometryFrame>odom</odometryFrame>
+            <commandTopic>cmd_vel</commandTopic>
+            <robotBaseFrame>base_link</robotBaseFrame>
+            <leftRearJoint>left_back_wheel_joint</leftRearJoint>
+            <rightRearJoint>right_back_wheel_joint</rightRearJoint>
+            <leftFrontJoint>left_front_wheel_joint</leftFrontJoint>
+            <rightFrontJoint>right_front_wheel_joint</rightFrontJoint>
+        </plugin>
+    </gazebo>
+
+</robot>

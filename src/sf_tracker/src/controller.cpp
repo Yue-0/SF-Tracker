@@ -30,6 +30,17 @@ namespace sf_tracker
     class Controller
     {
         public:
+            Path path;
+            int p = 0;
+            double angle[0x400];
+            double lambda1, lambda2, lambda3;
+            double max_vel, max_acc, vel = 0;
+            float max_time, dt, xt, yt;
+        
+        private:
+            Velocity velocity;
+
+        public:
             Controller()
             {
                 velocity.angular.x =
@@ -37,25 +48,14 @@ namespace sf_tracker
                 velocity.linear.z = 0;
             }
             void optimize();
-            Velocity control();
+            Velocity control(float, float);
             double sub(double, double);
 
         private:
             double clip(double*);
-        
-        public:
-            Path path;
-            int p = 0;
-            double angle[0x2710];
-            double lambda1, lambda2, lambda3;
-            double max_vel, max_acc, vel = 0;
-            float max_time, dist, dt, yaw, xt, yt, x = 0, y = 0;
-        
-        private:
-            Velocity velocity;
     };
 
-    Velocity Controller::control()
+    Velocity Controller::control(float x, float y)
     {
         Points points = path.poses;
         const int n = points.size() - 1;
@@ -66,10 +66,10 @@ namespace sf_tracker
             velocity.angular.z =
             vel = 0; return velocity;
         }
-        if(n * dt < dist)
+        if(n * dt < 1)
         {
             velocity.angular.z = max_vel * std::tanh(
-                sub(std::atan2(yt - y, xt - x), yaw)
+                std::atan2(yt - y, xt - x)
             );
             velocity.linear.x = velocity.linear.y = 0;
             vel = clip(&velocity.angular.z); p++;
@@ -81,24 +81,21 @@ namespace sf_tracker
               points[p + 0].pose.position.x),
         dy = (points[p + 1].pose.position.y -
               points[p + 0].pose.position.y);
-        velocity.angular.z = sub(theta, yaw) * t1;
+        velocity.angular.z = theta * t1;
         if(std::fabs(velocity.angular.z) < 1e-2)
         {
-            double
-            sin = std::sin(yaw) * t1,
-            cos = std::cos(yaw) * t1;
-            velocity.linear.x = cos * dx + sin * dy;
-            velocity.linear.y = cos * dy - sin * dx;
             velocity.angular.z = 0;
+            velocity.linear.x = dx * t1;
+            velocity.linear.y = dy * t1;
         }
         else
         {
-            double z = 1.0 / velocity.angular.z; double
-            i1 = (std::cos(yaw) - std::cos(theta)) * z,
-            i2 = (std::sin(theta) - std::sin(yaw)) * z;
-            double i = 1.0 / (pow2(i1) + pow2(i2)) * 1;
-            velocity.linear.x = (dx * i2 + dy * i1) * i;
-            velocity.linear.y = (dy * i2 - dx * i1) * i;
+            double z = 1.0 / velocity.angular.z;
+            double i1 = std::sin(theta) * z,
+            i2 = (1 - std::cos(theta)) * z;
+            double i = 1.0 / (pow2(i2) + pow2(i1));
+            velocity.linear.x = (dx * i1 + dy * i2) * i;
+            velocity.linear.y = (dy * i1 - dx * i2) * i;
         }   p++;
         vel = clip(&velocity.angular.z);
         return velocity;
@@ -107,8 +104,8 @@ namespace sf_tracker
     void Controller::optimize()
     {
         int n = path.poses.size() - 1;
-        angle[0] = yaw;
-        if(n * dt < dist)
+        angle[0] = 0;
+        if(n * dt < 1)
             return;
         Vector var(n - 1);
         for(int p = 1; p <= n; p++)
@@ -204,8 +201,8 @@ namespace sf_tracker
         for(int i = 0; i < n; i++)
         {
             cost = ctrl->angle[i + 1] - x[i];
-            grad[i] = -std::sin(cost);
-            j += 1 - std::cos(cost);
+            grad[i] = -ctrl->lambda3 * std::sin(cost);
+            j += (1 - std::cos(cost)) * ctrl->lambda3;
         }
         /* Structural Gradient */
         for(int i = 0; i < n; i++)
@@ -217,46 +214,43 @@ namespace sf_tracker
 int main(int argc, char* argv[])
 {
     ROS_INIT;
-    double scale;
+    float x0, y0;
     bool lock = false;
     ros::Time::init();
     ros::NodeHandle nh("~");
     sf_tracker::Controller controller;
-    controller.dt = nh.param("delta_t", 1e-2);
-    controller.dist = nh.param("distance", 1.0);
-    controller.max_vel = nh.param("max_vel_omiga", 2.0);
-    controller.max_acc = nh.param("max_acc_omiga", 1.5);
-    controller.lambda3 = nh.param("lambda_angle", 100.0);
-    controller.lambda2 = nh.param("lambda_smoothness", 1e-6);
-    controller.lambda1 = nh.param("lambda_feasibility", 1e-2);
+    controller.dt = nh.param("delta_t", 1e-1);
+    controller.max_vel = nh.param("max_vel_omiga", 1.5);
+    controller.max_acc = nh.param("max_acc_omiga", 1.0);
+    controller.lambda3 = nh.param("lambda_angle", 1.00);
+    controller.lambda2 = nh.param("lambda_smoothness", 0.10);
+    controller.lambda1 = nh.param("lambda_feasibility", 1.00);
     controller.max_time = nh.param("solution_time_limit", 1e-2);
     ros::Publisher publisher = nh.advertise<Velocity>("/cmd_vel", 1);
     ros::Publisher trajectory = nh.advertise<Path>("/trajectory", 1);
     ros::Subscriber subscriber = nh.subscribe<Path>(
-        "/path", 1, [&](Path::ConstPtr path){
+        "/path", 1, [&](Path::ConstPtr points){
             while(lock);
             lock = true;
+            Path path;
+            path.header = points->header;
             controller.p = 0;
-            controller.path = *path;
-            if(path->poses.size())
-            {
-                controller.xt = path->poses.back().pose.position.x;
-                controller.yt = path->poses.back().pose.position.y;
-                controller.path.poses.pop_back();
-            }
-            trajectory.publish(controller.path);
+            controller.path = *points;
+            controller.xt = points->poses.back().pose.position.x;
+            controller.yt = points->poses.back().pose.position.y;
+            int n = controller.path.poses.size() - 2;
+            controller.path.poses.pop_back();
+            trajectory.publish(n * controller.dt < 1? path: controller.path);
             controller.optimize();
             lock = false;
         }
     );
     ros::Subscriber map = nh.subscribe<nav_msgs::OccupancyGrid>(
-        "/costmap", 1, [&controller, &scale]
-        (nav_msgs::OccupancyGrid::ConstPtr costmap)
+        "/costmap", 1, [&x0, &y0]
+        (nav_msgs::OccupancyGrid::ConstPtr og)
         {
-            controller.yaw = 0;
-            scale = costmap->info.resolution;
-            controller.x = scale * (costmap->info.width >> 1);
-            controller.y = scale * (costmap->info.height >> 1);
+            x0 = og->info.resolution * (og->info.width >> 1);
+            y0 = og->info.resolution * (og->info.height >> 1);
         }
     );
     ros::Timer control = nh.createTimer(
@@ -265,7 +259,7 @@ int main(int argc, char* argv[])
             while(lock);
             lock = true;
             publisher.publish(
-                controller.control()
+                controller.control(x0, y0)
             );
             lock = false;
         }

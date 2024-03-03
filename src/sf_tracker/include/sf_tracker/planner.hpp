@@ -6,7 +6,6 @@
 
 #define INF 0xFFFFFFF
 #define pow2(n) (n)*(n)
-#define sgn(n) (n > 0? 1: (n < 0? -1: 0))
 #define encode(x, y, cols) (y * cols + x)
 #define decode(code, x, y, cols) x = code % cols, y = code / cols
 #define distance2(x1, y1, x2, y2) (pow2(x1 - x2) + pow2(y1 - y2))
@@ -28,7 +27,7 @@ namespace sf_tracker
     class PathSearcher
     {
         public:
-            PathSearcher(){};
+            PathSearcher(){}
             Points plan(const cv::Mat&, Point, Point);
 
         private:
@@ -42,12 +41,12 @@ namespace sf_tracker
     {
         public:
             cv::Mat sdf;
-            cv::Point2d q[0x2710];
-            float t, safe, max_vel, max_acc, max_time;
-            double lambda1, lambda2, lambda3, scale = 0;
+            cv::Point2d q[0x400];
+            double lambda_d, lambda_f, lambda_s;
+            float t, safe, max_vel, max_acc, max_time, scale = 0;
 
         public:
-            TrajectoryOptimizer(){};
+            TrajectoryOptimizer(){}
             Points plan(const cv::Mat&, const Points&,
                         double, double, double, double);
 

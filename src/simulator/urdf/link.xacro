@@ -1,225 +1,125 @@
 <?xml version="1.0" ?>
 
-<robot name="robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="rect" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <material name="blue">
-        <color rgba="0 0 0.8 1"/>
-    </material>
-    <material name="black">
-        <color rgba="0 0 0 1"/>
-    </material>
-    <material name="white">
-        <color rgba="1 1 1 1"/>
-    </material>
-    <material name="red">
-        <color rgba="0.8 0.0 0.0 1.0"/>
-    </material>
+    <xacro:property name="robot_mass" value="15" />
+    <xacro:property name="robot_width" value="0.4" />
+    <xacro:property name="robot_length" value="0.4" />
+    <xacro:property name="robot_height" value="0.1" />
 
-    <xacro:macro name="default_inertial" params="mass">
+    <xacro:property name="PI" value="3.141592653589793" />
+
+    <xacro:macro name="box_inertial_matrix" params="m l h w">
         <inertial>
-            <mass value="${mass}"/>
-            <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+            <mass value="${m}" />
+            <inertia ixx="${(m * (l * l + h * h)) / 12}" iyz="0"
+                     iyy="${(m * (w * w + h * h)) / 12}" ixz="0"
+                     izz="${(m * (w * w + l * l)) / 12}" ixy="0" />
         </inertial>
     </xacro:macro>
 
-    <xacro:macro name="robot">
-    	<link name="base_footprint"/>
-        <link name="base_link">
-            <inertial>
-                <mass value="15"/>
-                <origin rpy="0 0 0 " xyz="0 0 0"/>
-                <inertia ixx="0.3625" ixy="0" ixz="0" iyy="0.5" iyz="0" izz="0.7625"/>
-            </inertial>
+    <xacro:macro name="cylinder_inertial_matrix" params="m r h xyz rpy">
+        <inertial>
+            <mass value="${m}" />
+            <origin xyz="${xyz}" rpy="${rpy}" />
+            <inertia izz="${m * r * r / 2}" ixy="0"
+                     ixx="${m * (3 * r * r + h * h) / 12}" iyz="0" 
+                     iyy="${m * (3 * r * r + h * h) / 12}" ixz="0" />
+        </inertial>
+    </xacro:macro>
 
-            <collision>
-                <origin rpy="0 0 0" xyz="0 0 0"/>
-                <geometry>
-                    <box size="0.6 0.5 0.1"/>
-                </geometry>
-            </collision>
-
-            <visual>
-                <origin rpy="0 0 0" xyz="0 0 0"/>
-                <geometry>
-                    <box size="0.6 0.5 0.1"/>
-                </geometry>
-                <material name="blue"/>
-            </visual>
-        </link>
-
-        <joint name="base_joint" type="fixed">
-            <origin xyz="0 0 0" rpy="0 0 0" />
-            <parent link="base_footprint"/>
-            <child link="base_link" />
-        </joint>
-
-        <joint name="join_left_front" type="fixed">
-            <origin xyz="0.18 0.25 -0.045" rpy="0 0 1.57"/>
-            <parent link="base_link"/>
-            <child link="link_left_front"/>
-            <axis xyz="1 0 0" />
-            <limit effort="30" velocity="17.4" />
-        </joint>
-
-        <link name="link_left_front">
+    <xacro:macro name="wheel_link" params="name x">
+        <link name="${name}">
             <pose>0 0 0 0 0 0</pose>
-            <inertial>
-                <mass value="0.5"/>
-                <origin xyz="0.02 0 0" rpy="0 1.57 0"/>
-                <inertia ixx="0.0005" ixy="0" ixz="0" iyy="0.0005" iyz="0" izz="0.0009"/>
-            </inertial>
-
-            <collision>
-                <origin xyz="0.02 0 0" rpy="0 1.57 0"/>
-                <geometry>
-                    <cylinder radius="0.06" length="0.04"/>
-                </geometry>
-            </collision>
-
             <visual>
-                <origin xyz="0.02 0 0" rpy="0 1.57 0"/>
+                <origin xyz="${x} 0 0" rpy="0 ${PI / 2} 0" />
                 <geometry>
-                    <cylinder radius="0.06" length="0.04"/>
+                    <cylinder length="${robot_width / 10}"
+                              radius="${robot_length / 10}" />
                 </geometry>
-                <material name="wheels">
+                <material name="wheel_color">
                     <color rgba="0.6 0.6 0.6 1" />
                 </material>
             </visual>
-        </link>
-
-        <joint name="join_right_front" type="fixed">
-            <origin xyz="0.18 -0.25 -0.045" rpy="0 0 1.57"/>
-            <parent link="base_link"/>
-            <child link="link_right_front"/>
-            <axis xyz="1 0 0" />
-            <limit effort="30" velocity="17.4" />
-        </joint>
-
-        <link name="link_right_front">
-            <pose>0 0 0 0 0 0</pose>
-            <inertial>
-                <mass value="0.5"/>
-                <origin xyz="-0.02 0 0" rpy="0 1.57 0"/>
-                <inertia ixx="0.0005" ixy="0" ixz="0" iyy="0.0005" iyz="0" izz="0.0009"/>
-            </inertial>
-
             <collision>
-                <origin xyz="-0.02 0 0" rpy="0 1.57 0"/>
+                <origin xyz="${x} 0 0" rpy="0 ${PI / 2} 0" />
                 <geometry>
-                    <cylinder radius="0.06" length="0.04"/>
+                    <cylinder length="${robot_width / 10}"
+                              radius="${robot_length / 10}" />
                 </geometry>
             </collision>
-
-            <visual>
-                <origin xyz="-0.02 0 0" rpy="0 1.57 0"/>
-                <geometry>
-                    <cylinder radius="0.06" length="0.04"/>
-                </geometry>
-                <material name="wheels">
-                    <color rgba="0.6 0.6 0.6 1" />
-                </material>
-            </visual>
-        </link>
-
-        <joint name="join_left_back" type="fixed">
-            <origin xyz="-0.2 0.25 -0.045" rpy="0 0 1.57"/>
-            <parent link="base_link"/>
-            <child link="link_left_back"/>
-            <axis xyz="1 0 0" />
-            <limit effort="30" velocity="17.4" />
-        </joint>
-
-        <link name="link_left_back">
-            <pose>0 0 0 0 0 0</pose>
-
-            <inertial>
-                <mass value="0.5"/>
-                <origin xyz="0.02 0 0" rpy="0 1.57 0"/>
-                <inertia ixx="0.0005" ixy="0" ixz="0" iyy="0.0005" iyz="0" izz="0.0009"/>
-            </inertial>
-
-
-            <collision>
-                <origin xyz="0.02 0 0" rpy="0 1.57 0"/>
-                <geometry>
-                    <cylinder radius="0.06" length="0.04"/>
-                </geometry>
-            </collision>
-
-            <visual>
-                <origin xyz="0.02 0 0" rpy="0 1.57 0"/>
-                <geometry>
-                    <cylinder radius="0.06" length="0.04"/>
-                </geometry>
-                <material name="wheels">
-                    <color rgba="0.6 0.6 0.6 1" />
-                </material>
-            </visual>
-        </link>
-
-        <joint name="join_right_back" type="fixed">
-            <origin xyz="-0.2 -0.25 -0.045" rpy="0 0 1.57"/>
-            <parent link="base_link"/>
-            <child link="link_right_back"/>
-            <axis xyz="1 0 0" />
-            <limit effort="30" velocity="17.4" />
-        </joint>
-
-        <link name="link_right_back">
-            <pose>0 0 0 0 0 0</pose>
-
-            <inertial>
-                <mass value="0.5"/>
-                <origin xyz="-0.02 0 0" rpy="0 1.57 0"/>
-                <inertia ixx="0.0005" ixy="0" ixz="0" iyy="0.0005" iyz="0" izz="0.0009"/>
-            </inertial>
-
-            <collision>
-                <origin xyz="-0.02 0 0" rpy="0 1.57 0"/>
-                <geometry>
-                    <cylinder radius="0.06" length="0.04"/>
-                </geometry>
-            </collision>
-
-            <visual>
-                <origin xyz="-0.02 0 0" rpy="0 1.57 0"/>
-                <geometry>
-                    <cylinder radius="0.06" length="0.04"/>
-                </geometry>
-                <material name="wheels">
-                    <color rgba="0.6 0.6 0.6 1" />
-                </material>
-            </visual>
-        </link>
-        
-        <joint name="joint_laser" type="fixed">
-            <origin xyz="0.2 0 0.1" rpy="0 0 0"/>
-            <parent link="base_link"/>
-            <child link="laser1"/>
-        </joint>
-
-        <link name="laser1">
-            <pose>0 0 0 0 0 0</pose>
-            <inertial>
-                <mass value="0.2"/>
-                <origin xyz="0 0 0" rpy="0 0 0"/>
-                <inertia ixx="0.0005" ixy="0" ixz="0" iyy="0.0005" iyz="0" izz="0.0009"/>
-            </inertial>
-
-            <collision>
-                <origin xyz="0 0 0" rpy="0 0 0"/>
-                <geometry>
-                    <cylinder radius="0.03" length="0.03"/>
-                </geometry>
-            </collision>
-
-            <visual>
-                <origin xyz="0 0 0" rpy="0 0 0"/>
-                <geometry>
-                    <cylinder radius="0.03" length="0.03"/>
-                </geometry>
-                <material name="red"/>
-            </visual>
+            <xacro:cylinder_inertial_matrix m="0.525"
+                                            h="${robot_width / 10}"
+                                            r="${robot_length / 10}"
+                                            xyz="${x} 0 0" rpy="0 ${PI / 2} 0" />
         </link>
     </xacro:macro>
+
+    <xacro:macro name="wheel_joint" params="name x y">
+        <joint name="${name}_joint" type="fixed">
+            <child link="${name}" />
+            <parent link="base_link" />
+            <origin xyz="${x} ${y} -0.045" rpy="0 0 ${PI / 2}" />
+        </joint>
+    </xacro:macro>
+
+    <link name="base_link">
+        <visual>
+            <geometry>
+                <box size="${robot_length} ${robot_width} ${robot_height}" />
+            </geometry>
+            <material name="robot_color">
+                    <color rgba="0.3 0.3 0.3 1" />
+                </material>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="${robot_length} ${robot_width} ${robot_height}" />
+            </geometry>
+        </collision>
+        <xacro:box_inertial_matrix m="${robot_mass}" 
+         l="${robot_length}" h="${robot_height}" w="${robot_width}" />
+    </link>
+
+    <link name="laser1">
+        <pose>0 0 0 0 0 0</pose>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <cylinder radius="0.03" length="0.03" />
+            </geometry>
+            <material name="laser_color" >
+                <color rgba="0.8 0 0 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <cylinder radius="0.03" length="0.03" />
+            </geometry>
+        </collision>
+        <xacro:cylinder_inertial_matrix m="0.2" r="0.03" h="0.03" 
+                                        xyz="0 0 0" rpy="0 ${PI / 2} 0" />
+    </link>
+
+    <xacro:wheel_link name="left_back_wheel" x="0.02" />
+    <xacro:wheel_link name="left_front_wheel" x="0.02" />
+    <xacro:wheel_link name="right_back_wheel" x="-0.02" />
+    <xacro:wheel_link name="right_front_wheel" x="-0.02" />
+
+    <xacro:wheel_joint name="left_front_wheel"
+                       x="${robot_length / 3}" y="${robot_width / 2}" />
+    <xacro:wheel_joint name="left_back_wheel"
+                       x="${-robot_length / 3}" y="${robot_width / 2}" />
+    <xacro:wheel_joint name="right_front_wheel"
+                       x="${robot_length / 3}" y="${-robot_width / 2}" />
+    <xacro:wheel_joint name="right_back_wheel"
+                       x="${-robot_length / 3}" y="${-robot_width / 2}" />
+    
+    <joint name="laser_joint" type="fixed">
+        <origin xyz="0.15 0 0.1" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="laser1" />
+    </joint>
+
 </robot>
