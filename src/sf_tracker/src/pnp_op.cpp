@@ -163,9 +163,9 @@ namespace sf_tracker
         double t1 = 1 / dt,
         theta = angles[p + 1],
         dx = (path.poses[p + 1].pose.position.x -
-                path.poses[p + 0].pose.position.x),
+              path.poses[p + 0].pose.position.x),
         dy = (path.poses[p + 1].pose.position.y -
-                path.poses[p + 0].pose.position.y);
+              path.poses[p + 0].pose.position.y);
         if(std::fabs(velocity.angular.z = theta * t1) > max_omega)
             velocity.angular.z = max_omega * sign(theta);
         if(std::fabs(velocity.angular.z) < 1e-2)
