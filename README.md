@@ -61,7 +61,7 @@ sudo apt install ros-noetic-robot-state-publisher
 sudo apt install ros-noetic-joint-state-publisher
 ```
 
-To start the launch file to run the simulation, you need to publish the position of the target via `2D Pose Estimate` in RVIZ.
+To start the launch file to run the simulation, you need to publish the position of the target via `2D Nav Goal` in RVIZ.
 
 ```shell
 roslaunch simulator tracking.launch

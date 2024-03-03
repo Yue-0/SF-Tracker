@@ -61,7 +61,7 @@ sudo apt install ros-noetic-robot-state-publisher
 sudo apt install ros-noetic-joint-state-publisher
 ```
 
-启动 launch 文件运行仿真，你需要通过 RVIZ 中的 `2D Pose Estimate` 发布目标的位置。
+启动 launch 文件运行仿真，你需要通过 RVIZ 中的 `2D Nav Goal` 发布目标的位置。
 
 ```shell
 roslaunch simulator tracking.launch
