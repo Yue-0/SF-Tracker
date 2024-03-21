@@ -2,14 +2,6 @@
 
 [English](README.md) | __简体中文__
 
-<!-- ## 论文
-
-即将发布 -->
-
-## 视频
-
-![视频](https://github.com/Yue-0/SF-Tracker/assets/98451547/478b51a2-debc-4079-9fda-35872534d592)
-
 ## 使用说明
 
 以下代码在 Ubuntu20.04 & ROS-noetic 下测试通过。
