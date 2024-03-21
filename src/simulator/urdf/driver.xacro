@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 
+<!-- Author: YueLin -->
+
 <robot name="gazebo_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <xacro:macro name="gazebo_wheel" params="name" >

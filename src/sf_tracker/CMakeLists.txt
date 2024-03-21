@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
     tf
     roscpp
     nav_msgs
+    std_msgs
     sensor_msgs
     geometry_msgs
 )
@@ -21,15 +22,15 @@ include_directories(
     ${OpenCV_INCLUDE_DIRS}
 )
 
-add_executable(pnp_op src/pnp_op.cpp)
-add_executable(planner src/planner.cpp)
+add_executable(pp src/trajectory.cpp)
+add_executable(op src/orientation.cpp)
 add_executable(costmap src/costmap.cpp)
 
-target_link_libraries(pnp_op
+target_link_libraries(op
     ${NLOPT_LIBRARIES}
     ${catkin_LIBRARIES}
 )
-target_link_libraries(planner
+target_link_libraries(pp
     ${OpenCV_LIBS}
     ${NLOPT_LIBRARIES}
     ${catkin_LIBRARIES}

@@ -1,6 +1,7 @@
 /* @author: YueLin */
 
 #include <cmath>
+#include <chrono>
 
 #include <tf/tf.h>
 #include <ros/ros.h>
@@ -8,22 +9,29 @@
 
 #include "sensor_msgs/LaserScan.h"
 #include "nav_msgs/OccupancyGrid.h"
+#include "std_msgs/Float32MultiArray.h"
 
 #include "sf_tracker/bfs.hpp"
 
 #define ROS_INIT ros::init(argc, argv, "costmap")
+#define TIME_US std::chrono::duration_cast<std::chrono::microseconds>(\
+    std::chrono::system_clock::now().time_since_epoch()\
+).count()
 
 #define swap(a, b) {a += b; b = a - b; a -= b;}
 
 typedef sensor_msgs::LaserScan Scan;
 typedef nav_msgs::OccupancyGrid Map;
+typedef std_msgs::Float32MultiArray Array;
 
 int main(int argc, char* argv[])
 {
     ROS_INIT;
     Scan lidar;
     Map costmap;
+    Array array;
     cv::Mat sdf;
+    long long time;
     ros::Time::init();
     bool ready = false;
     double x0, y0, yaw;
@@ -37,10 +45,11 @@ int main(int argc, char* argv[])
         ROS_ERROR("Missing parameter: robot_frame");
     if(!nh.getParam("lidar_frame", lidar_frame))
         ROS_ERROR("Missing parameter: lidar_frame");
-    int width = 2 * nh.param("width", 1000);
-    int height = 2 * nh.param("height", 1000);
-    int expansion = nh.param("expansion", 40);
-    float scale = 1 / nh.param("scale", 1e-2);
+    double scale = 1 / nh.param("scale", 1e-2);
+    ros::Rate sleep(nh.param("update_rate", 20));
+    int width = 2 * nh.param("width", 10.0) * scale;
+    int height = 2 * nh.param("height", 10.0) * scale;
+    int expansion = nh.param("expansion", 0.4) * scale;
     cv::Mat map = cv::Mat(height, width, CV_8UC1, 0xFF);
     listener.waitForTransform(
         map_frame, robot_frame, ros::Time(0), ros::Duration(100)
@@ -50,10 +59,13 @@ int main(int argc, char* argv[])
     );
     costmap.info.width = width;
     costmap.info.height = height;
-    costmap.info.resolution = 1e-2;
+    array.layout.data_offset = width;
+    array.data.resize(width * height);
     costmap.data.resize(width * height);
+    costmap.info.resolution = 1 / scale;
     costmap.header.frame_id = map_frame;
     ros::Publisher publisher = nh.advertise<Map>("/costmap", 1);
+    ros::Publisher constructor = nh.advertise<Array>("/esdf", 1);
     ros::Subscriber laser = nh.subscribe<Scan>(
         "/scan", 1, [&lidar, &ready](Scan::ConstPtr scan){
             lidar = *scan; ready = true;
@@ -64,7 +76,7 @@ int main(int argc, char* argv[])
         ros::spinOnce();
         if(!ready) continue; map *= 0;
         cv::rectangle(
-            map, cv::Rect(0, 0, width, height), 0x64, 10
+            map, cv::Rect(0, 0, width, height), 0x64, expansion >> 2
         );
         listener.lookupTransform(
             map_frame, lidar_frame, ros::Time(0), transform
@@ -83,9 +95,11 @@ int main(int argc, char* argv[])
             }
             yaw += lidar.angle_increment;
         }
+        time = TIME_US;
         cv::distanceTransform(
             0xFF - map, sdf, cv::DIST_L2, cv::DIST_MASK_PRECISE
         );
+        ROS_INFO("[ESDF] Time: %f ms", (TIME_US - time) * 1e-3);
         for(int y = 0; y < map.rows; y++)
             for(int x = 0; x < map.cols; x++)
             {
@@ -113,9 +127,14 @@ int main(int argc, char* argv[])
         {
             int z = y * costmap.info.width;
             for(int x = 0; x < map.cols; x++)
+            {
+                array.data[z + x] = sdf.at<float>(y, x);
                 costmap.data[z + x] = map.at<uchar>(y, x);
+            }
         }
         publisher.publish(costmap);
+        constructor.publish(array);
+        sleep.sleep();
     }
     return 0;
 }

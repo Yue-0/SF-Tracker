@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include <queue>
-#include <thread>
+#include <chrono>
 #include <utility>
 
 #include <tf/tf.h>
@@ -16,12 +16,16 @@
 #include "geometry_msgs/Twist.h"
 #include "nav_msgs/OccupancyGrid.h"
 #include "geometry_msgs/PoseStamped.h"
+#include "std_msgs/Float32MultiArray.h"
 
+#include "sf_tracker/pp.hpp"
 #include "sf_tracker/bfs.hpp"
-#include "sf_tracker/planner.hpp"
 
 #define TIME ros::Time::now().toSec()
 #define ROS_INIT ros::init(argc, argv, "planner")
+#define TIME_US std::chrono::duration_cast<std::chrono::microseconds>(\
+    std::chrono::system_clock::now().time_since_epoch()\
+).count()
 
 #define zero(f) std::fabs(f) < 1e-6
 #define path_push(x0, y0) do\
@@ -45,8 +49,11 @@ namespace sf_tracker
             FIX(map, end);
         if(!map.at<uchar>(start.y, start.x))
             FIX(map, start);
+        long long time = TIME_US;
         Points path = keypoint(astar(map, start, end));
-        return path.size()? dijkstra(graph(map, path), path): path;
+        path = path.size()? dijkstra(graph(map, path), path): path;
+        ROS_INFO("[Path search] Time: %f ms", (TIME_US - time) * 1e-3);
+        return path;
     }
 
     Points PathSearcher::keypoint(const Points& path)
@@ -193,30 +200,15 @@ namespace sf_tracker
                                      double acc_x, double acc_y)
     {
         if(path.empty()) return path;
-        std::thread thread([=, &map](){esdf(map);});
-        Points b = bspline(
+        Points b = optimize(bspline(
             samples(path), vel_x, vel_y, acc_x, acc_y
-        ); thread.join(); b = optimize(b);
-        const int n = b.size() - 3;
+        )); const int n = b.size() - 3;
         if(n <= 1) return path; Points optimized;
         for(int p = 1; p < n; p++)
             optimized.push_back((
                 b[p] + 4 * b[p + 1] + b[p + 2]
             ) / 6.0);
         return optimized;
-    }
-
-    void TrajectoryOptimizer::esdf(const cv::Mat& map)
-    {
-        cv::distanceTransform(
-            map, sdf, cv::DIST_L2, cv::DIST_MASK_PRECISE
-        );
-        for(int y = 0; y < map.rows; y++)
-            for(int x = 0; x < map.cols; x++)
-                if(sdf.at<float>(y, x))
-                    sdf.at<float>(y, x) *= scale;
-                else
-                    sdf.at<float>(y, x) = 1e-6;
     }
 
     Points TrajectoryOptimizer::bspline(const Points& points,
@@ -276,6 +268,7 @@ namespace sf_tracker
     Points TrajectoryOptimizer::optimize(const Points& points)
     {
         int num, n = points.size();
+        long long time = TIME_US;
         if((num = n - 6) <= 0)
             return points;
         Vector x(num << 1);
@@ -307,12 +300,19 @@ namespace sf_tracker
             optimizer.set_xtol_rel(1e-7);
             optimizer.optimize(x, cost);
         }
-        catch(std::exception& _){}
+        catch(std::exception& _)
+        {
+            ROS_WARN("[Trajectory optimization] Failed");
+        }
         for(int i = 0; i < num; i++)
         {
             path[i + 3].x = std::round(x[i << 1] / scale);
             path[i + 3].y = std::round(x[(i << 1) + 1] / scale);
         }
+        ROS_INFO(
+            "[Trajectory optimization] Time: %f ms", 
+            (TIME_US - time) * 1e-3
+        );
         return path;
     }
 
@@ -396,6 +396,8 @@ namespace sf_tracker
         const cv::Mat esdf = opt->sdf;
         for(int i = 3; i < n + 3; i++)
         {
+            /* We use INTER_NEAREST now */
+            /* TODO: We will use INTER_LINEAR */
             int x = std::round(opt->q[i].x / opt->scale);
             int y = std::round(opt->q[i].y / opt->scale);
             x = std::max(std::min(x, esdf.cols - 2), 1);
@@ -482,6 +484,23 @@ int main(int argc, char* argv[])
                 for(int x = 0; x < w; x++)
                     if(costmap->data[z + x])
                         map.at<uchar>(y, x) = 0;
+            }
+        }
+    );
+    ros::Subscriber esdf = nh.subscribe<std_msgs::Float32MultiArray>(
+        "/esdf", 1, [&optimizer](std_msgs::Float32MultiArray::ConstPtr array)
+        {
+            int w = array->layout.data_offset;
+            int h = array->data.size() / w;
+            optimizer.sdf = cv::Mat(cv::Size(w, h), CV_32FC1);
+            for(int y = 0; y < h; y++)
+            {
+                int z = y * w;
+                for(int x = 0; x < w; x++)
+                    if(optimizer.sdf.at<float>(y, x) = array->data[z + x])
+                        optimizer.sdf.at<float>(y, x) *= optimizer.scale;
+                    else
+                        optimizer.sdf.at<float>(y, x) = 1e-6;
             }
         }
     );

@@ -4,7 +4,6 @@
 
 #include "opencv2/opencv.hpp"
 
-#define INF 0xFFFFFFF
 #define pow2(n) (n)*(n)
 #define encode(x, y, cols) (y * cols + x)
 #define decode(code, x, y, cols) x = code % cols, y = code / cols
@@ -51,7 +50,6 @@ namespace sf_tracker
                         double, double, double, double);
 
         private:
-            void esdf(const cv::Mat&);
             Points samples(const Points&);
             Points optimize(const Points&);
             Points bspline(const Points&, double, double, double, double);

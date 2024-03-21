@@ -2,9 +2,13 @@
 
 __English__ | [简体中文](README_cn.md)
 
-<!-- Paper：[arXiv]() -->
+<!-- ## Paper
 
-<!-- Video：[Bilibili]() -->
+Coming soon. -->
+
+## Video
+
+![video](https://github.com/Yue-0/SF-Tracker/assets/98451547/478b51a2-debc-4079-9fda-35872534d592)
 
 ## Instruction for Use
 
@@ -73,26 +77,8 @@ See [real_world](src/real_world/README.md) package.
 
 ### 6. Modify Hyperparameters
 
-All hyperparameters of SF-Tracker are defined in the file [planning.launch](src/sf_tracker/launch/planning.launch). It should be noted that if you modify the size parameter, you need to change the first two parameters of args on line 14 to match size.
+All hyperparameters of SF-Tracker are defined in the file [planning.launch](src/sf_tracker/launch/planning.launch).
 
-### 7. PnP-Tracker
+## Acknowledgments
 
-Run a complete navigation framework, and then run the following launch file to add tracking functionality to the navigation:
-
-```shell
-roslaunch sf_tracker pnp_tracker.launch
-```
-
-The launch file will run a ROS node named pnp_tracker, which subscribes to the following topics:
-
-| Topic    | Message                | Note                    |
-|:--------:|:----------------------:|:------------------------|
-| /path    | nav_msgs/Path          | Trajectory output by trajectory planner. The last point is the target position |
-| /costmap | nav_msgs/OccupancyGrid | Map used for navigation |
-
-This node publishes the following topics:
-
-| Topic       | Message             | Note       |
-|:-----------:|:-------------------:|:-----------|
-| /cmd_vel    | geometry_msgs/Twist | Velocity   |
-| /trajectory | nav_msgs/Path       | Trajectory |
+We refer to the open source code of [Fast-Planner](https://github.com/HKUST-Aerial-Robotics/Fast-Planner).

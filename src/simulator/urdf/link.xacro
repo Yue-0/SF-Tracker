@@ -1,5 +1,7 @@
 <?xml version="1.0" ?>
 
+<!-- Author: YueLin -->
+
 <robot name="rect" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <xacro:property name="robot_mass" value="15" />

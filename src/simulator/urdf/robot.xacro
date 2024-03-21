@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 
+<!-- Author: YueLin -->
+
 <robot name="robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
     <xacro:include filename="$(find simulator)/urdf/link.xacro" />
     <xacro:include filename="$(find simulator)/urdf/driver.xacro" />

@@ -6,7 +6,7 @@
 #define CLIP(v, v0, dt, am) do\
 {\
     double a = (v - v0) / dt;\
-    if(std::fabs(a) > am)\
+    if(std::fabs(a) > am && std::fabs(v) > 1e-3)\
         v = v0 + am * dt * sign(a);\
 }\
 while(false)

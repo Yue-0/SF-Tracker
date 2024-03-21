@@ -6,12 +6,12 @@
 
 #include "opencv2/opencv.hpp"
 
+#define INF 0xFFFFFFF
+
 namespace sf_tracker
 {
     typedef unsigned int uint;
     typedef std::pair<int, int> int2D;
-
-    const uint INF = 0xFFFFFFFF;
 
     int2D bfs(const cv::Mat& map, int xs, int ys, int d_thr)
     {

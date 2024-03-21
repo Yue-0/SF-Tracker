@@ -1,17 +1,25 @@
 /* @author: YueLin */
 
+#include <chrono>
+#include <string>
+
+#include <tf/tf.h>
 #include <ros/ros.h>
 #include <nlopt.hpp>
 #include <Eigen/Eigen>
+#include <tf/transform_listener.h>
 
 #include "nav_msgs/Path.h"
 #include "geometry_msgs/Twist.h"
 #include "nav_msgs/OccupancyGrid.h"
 #include "geometry_msgs/PoseStamped.h"
 
-#include "sf_tracker/pnp_op.hpp"
+#include "sf_tracker/op.hpp"
 
 #define ROS_INIT ros::init(argc, argv, "pnp_op")
+#define TIME_US std::chrono::duration_cast<std::chrono::microseconds>(\
+    std::chrono::system_clock::now().time_since_epoch()\
+).count()
 
 typedef nav_msgs::Path Path;
 typedef geometry_msgs::Twist Velocity;
@@ -49,6 +57,7 @@ namespace sf_tracker
     Vector OrientationPlanner::optimize(const Vector& angles)
     {
         int num, n = angles.size();
+        long long time = TIME_US;
         if(n < 4) return angles;
         Vector x(num = n - 1);
         yaw.assign(angles.begin(), angles.end());
@@ -65,7 +74,14 @@ namespace sf_tracker
             optimizer.set_xtol_rel(1e-7);
             optimizer.optimize(x, cost);
         }
-        catch(std::exception& _){}
+        catch(std::exception& _)
+        {
+            ROS_WARN("[Orientation optimization] Failed");
+        }
+        ROS_INFO(
+            "[Orientation optimization] Time: %f ms", 
+            (TIME_US - time) * 1e-3
+        );
         Vector orientation(angles);
         for(int i = 0; i < num; i++)
             orientation[i + 1] = x[i];
@@ -192,7 +208,10 @@ int main(int argc, char* argv[])
     ROS_INIT;
     float x0, y0;
     ros::Time::init();
+    std::string frame;
     ros::NodeHandle nh("~");
+    tf::StampedTransform st;
+    tf::TransformListener tl;
     sf_tracker::OrientationPlanner op;
     sf_tracker::VelocityController vc;
     vc.dt = op.t = nh.param("delta_t", 0.1);
@@ -200,7 +219,9 @@ int main(int argc, char* argv[])
     op.mu_v = nh.param("mu_visibility", 1e2);
     op.mu_s = nh.param("mu_smoothness", 1e-2);
     op.mu_f = nh.param("mu_feasibility", 1e-1);
-    op.max_time = nh.param("solution_time_limit", 1e-2);
+    if(!nh.getParam("trajectory_frame", frame))
+        ROS_ERROR("Missing parameter: trajectory_frame");
+    op.max_time = nh.param("solution_time_limit", 1.e-2);
     op.max_alpha = vc.max_alpha = nh.param("max_alpha", 1.0);
     op.max_omega = vc.max_omega = nh.param("max_omega", 1.5);
     ros::Publisher velocity = nh.advertise<Velocity>("/cmd_vel", 1);
@@ -208,20 +229,47 @@ int main(int argc, char* argv[])
     ros::Subscriber subscriber = nh.subscribe<Path>(
         "/path", 1, [&](Path::ConstPtr points){
             int a = 0;
+            Path path;
+            bool transform;
+            path.header = points->header;
+            path.header.frame_id = frame;
             vc.applyForLockAndResetPointer();
-            Path path; path.header = points->header;
+            if(transform = points->header.frame_id.compare(frame))
+                tl.lookupTransform(
+                    points->header.frame_id,
+                    frame, ros::Time(0), st
+                );
+            vc.path = *points;
+            vc.path.poses.pop_back();
+            vc.path.header = path.header;
+            int n = vc.path.poses.size() - 1;
             vc.xt = points->poses.back().pose.position.x;
             vc.yt = points->poses.back().pose.position.y;
-            vc.path = *points; vc.path.poses.pop_back();
-            const int n = vc.path.poses.size() - 1;
+            if(transform)
+            {
+                tf::Vector3 origin = st.getOrigin();
+                double yaw = tf::getYaw(st.getRotation());
+                double sin = std::sin(yaw), cos = std::cos(yaw);
+                tfScalar dx, dy, ox = origin.x(), oy = origin.y();
+                for(int p = 0; p <= n; p++)
+                {
+                    vc.path.poses[p].header.frame_id = frame;
+                    dx = points->poses[p].pose.position.x - ox;
+                    dy = points->poses[p].pose.position.y - oy;
+                    vc.path.poses[p].pose.position.x = dx * cos + dy * sin;
+                    vc.path.poses[p].pose.position.y = dy * cos - dx * sin;
+                }
+                dx = vc.xt - ox; dy = vc.yt - oy;
+                vc.xt = dx * cos + dy * sin; vc.yt = dy * cos - dx * sin;
+            }
             trajectory.publish(
                 n * vc.dt < vc.dis? path: vc.path
             );
             sf_tracker::Vector orientations(1, 0);
-            for(int i = 1; i <= n; i++)
+            for(int p = 1; p <= n; p++)
                 orientations.push_back(std::atan2(
-                    vc.yt - points->poses[i].pose.position.y,
-                    vc.xt - points->poses[i].pose.position.x
+                    vc.yt - vc.path.poses[p].pose.position.y,
+                    vc.xt - vc.path.poses[p].pose.position.x
                 ));
             for(double angle: op.optimize(orientations))
                 vc.angles[a++] = angle;

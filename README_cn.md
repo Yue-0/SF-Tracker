@@ -2,9 +2,13 @@
 
 [English](README.md) | __简体中文__
 
-<!-- 论文：[arXiv]() -->
+<!-- ## 论文
 
-<!-- 视频：[哔哩哔哩]() -->
+即将发布 -->
+
+## 视频
+
+![视频](https://github.com/Yue-0/SF-Tracker/assets/98451547/478b51a2-debc-4079-9fda-35872534d592)
 
 ## 使用说明
 
@@ -73,26 +77,8 @@ roslaunch simulator tracking.launch
 
 ### 6. 修改超参数
 
-SF-Tracker 的所有超参数都定义在文件 [planning.launch](src/sf_tracker/launch/planning.launch) 中。需要注意的是，如果你修改了 size 参数，则需更改第 14 行的 args 的前两个参数，使其与 size 相匹配。
+SF-Tracker 的所有超参数都定义在文件 [planning.launch](src/sf_tracker/launch/planning.launch) 中。
 
-### 7. PnP-Tracker
+## 鸣谢
 
-运行一个完整的导航框架，然后运行以下 launch 文件为导航增加跟踪功能：
-
-```shell
-roslaunch sf_tracker pnp_tracker.launch
-```
-
-该 launch 文件会开启一个名为 pnp_tracker 的 ROS 节点，该节点订阅以下话题：
-
-| Topic    | Message                | Note                                     |
-|:--------:|:----------------------:|:-----------------------------------------|
-| /path    | nav_msgs/Path          | 轨迹规划器输出的轨迹，最后一个点为目标的位置 |
-| /costmap | nav_msgs/OccupancyGrid | 导航所需的地图                            |
-
-该节点发布以下话题：
-
-| Topic       | Message             | Note      |
-|:-----------:|:-------------------:|:----------|
-| /cmd_vel    | geometry_msgs/Twist | 速度控制量 |
-| /trajectory | nav_msgs/Path       | 轨迹      |
+我们参考了 [Fast-Planner](https://github.com/HKUST-Aerial-Robotics/Fast-Planner) 的开源代码。
