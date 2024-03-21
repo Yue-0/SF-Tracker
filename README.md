@@ -8,7 +8,11 @@ Coming soon. -->
 
 ## Video
 
-![video](https://github.com/Yue-0/SF-Tracker/assets/98451547/478b51a2-debc-4079-9fda-35872534d592)
+
+
+https://github.com/Yue-0/SF-Tracker/assets/98451547/b0d80213-9b5e-4fec-a20e-c4929c28dfb8
+
+
 
 ## Instruction for Use
 
