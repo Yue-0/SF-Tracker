@@ -14,7 +14,7 @@
 
 参见 [RoboRTS-Base](https://github.com/RoboMaster/RoboRTS-Base) 安装机器人驱动。
 
-你也可以修改 detection.launch 的第 3 行或 tracking.launch 的第 3 行来支持自己的机器人。你的机器人应该订阅话题 `\cmd_vel` 作为速度控制量，消息类型为 `geometry_msgs/Twist`。
+你也可以修改 detection.launch 的第 3 行或 tracking.launch 的第 3 行来支持自己的机器人。你的机器人应该订阅话题 `/cmd_vel` 作为速度控制量，消息类型为 `geometry_msgs/Twist`。
 
 ### 2. 雷达驱动
 
