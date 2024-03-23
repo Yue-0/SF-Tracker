@@ -14,7 +14,7 @@ Our algorithm supports ground omnidirectional robots, and the robot we use is th
 
 See [RoboRTS-Base](https://github.com/RoboMaster/RoboRTS-Base) to install the robot driver.
 
-You can also modify line 3 of [detection.launch](launch/detection.launch) and line 3 of [tracking.launch](launch/tracking.launch) to support your own bots. Your robot should subscribe to topic `\cmd_vel` as velocity control volume, with message type `geometry_msgs/Twist`.
+You can also modify line 3 of [detection.launch](launch/detection.launch) and line 3 of [tracking.launch](launch/tracking.launch) to support your own bots. Your robot should subscribe to topic `/cmd_vel` as velocity control volume, with message type `geometry_msgs/Twist`.
 
 ### 2. Lidar Driver
 
