@@ -1,7 +1,6 @@
 build
 devel
 .vscode
-.catkin_workspace
 
 src/sf_tracker/include/nlopt
 src/real_world/onnx/HiT.onnx
