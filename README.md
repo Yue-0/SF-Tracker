@@ -2,17 +2,15 @@
 
 __English__ | [简体中文](README_cn.md)
 
-<!-- ## Paper
+## Paper
 
-Coming soon. -->
+__Safety-First Tracker: A Trajectory Planning Framework for Omnidirectional Robot Tracking__. 
+Accepted by __IROS 2024__.
+Authors: [Yue Lin](https://github.com/Yue-0), Yang Liu, Pingping Zhang, [Xin Chen](https://github.com/chenxin-dlut), Dong Wang and Huchuan Lu.
 
 ## Video
 
-
-
 https://github.com/Yue-0/SF-Tracker/assets/98451547/b0d80213-9b5e-4fec-a20e-c4929c28dfb8
-
-
 
 ## Instruction for Use
 
@@ -82,7 +80,3 @@ See [real_world](src/real_world/README.md) package.
 ### 6. Modify Hyperparameters
 
 All hyperparameters of SF-Tracker are defined in the file [planning.launch](src/sf_tracker/launch/planning.launch).
-
-## Acknowledgments
-
-We refer to the open source code of [Fast-Planner](https://github.com/HKUST-Aerial-Robotics/Fast-Planner).

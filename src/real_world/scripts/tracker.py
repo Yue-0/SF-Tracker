@@ -164,7 +164,7 @@ class Tracker:
     
     def locate(self) -> None:
         (self.x, self.y, _), angle = self.listener.lookupTransform(
-            self.odom_frame, self.robot_frame
+            self.odom_frame, self.robot_frame, rospy.Time()
         )
         self.yaw = tf.transformations.euler_from_quaternion(angle)[-1]
     

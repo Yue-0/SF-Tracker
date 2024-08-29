@@ -5,8 +5,7 @@
     <description>The sf_tracker package</description>
 
     <license>Apache-2.0</license>
-    <author email="yuelin@mail.dlut.edu.cn">YueLin</author>
-    <maintainer email="lhchuan@dlut.edu.cn">HuchuanLu</maintainer>
+    <maintainer email="yuelin@mail.dlut.edu.cn">Yue Lin</maintainer>
     <url type="website">https://github.com/Yue-0/SF-Tracker/tree/main/src/sf_tracker</url>
 
     <buildtool_depend>catkin</buildtool_depend>

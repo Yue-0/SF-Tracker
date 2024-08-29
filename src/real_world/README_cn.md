@@ -39,17 +39,7 @@ cd src/real_world
 pip install -r requirements.txt
 ```
 
-你还需要下载目标检测或单目标跟踪模型的 ONNX 文件，参考[这里](onnx/README_cn.md)。
-
-## 开始跟踪
-
-跟踪行人：
-
-```shell
-roslaunch real_world detection.launch
-```
-
-跟踪任意目标：
+## 开始跟踪任意目标
 
 ```shell
 roslaunch real_world tracking.launch

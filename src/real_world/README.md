@@ -39,17 +39,7 @@ We use Python to implement the visual recognition algorithm and need to install 
 pip install -r requirements.txt
 ```
 
-You also need to download the ONNX file of the object detection or single object tracking model, refer to [here](onnx/README.md).
-
-## Start Tracking
-
-Tracking a person：
-
-```shell
-roslaunch real_world detection.launch
-```
-
-Tracking any target：
+## Start Tracking any target
 
 ```shell
 roslaunch real_world tracking.launch

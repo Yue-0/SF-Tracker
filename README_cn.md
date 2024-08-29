@@ -70,7 +70,3 @@ roslaunch simulator tracking.launch
 ### 6. 修改超参数
 
 SF-Tracker 的所有超参数都定义在文件 [planning.launch](src/sf_tracker/launch/planning.launch) 中。
-
-## 鸣谢
-
-我们参考了 [Fast-Planner](https://github.com/HKUST-Aerial-Robotics/Fast-Planner) 的开源代码。
