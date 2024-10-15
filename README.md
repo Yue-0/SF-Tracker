@@ -8,12 +8,7 @@ __Safety-First Tracker: A Trajectory Planning Framework for Omnidirectional Robo
 Accepted by __IROS 2024__.
 Authors: [Yue Lin](https://github.com/Yue-0), Yang Liu, Pingping Zhang, [Xin Chen](https://github.com/chenxin-dlut), Dong Wang and Huchuan Lu.
 
-## Video
-
-
-
-<a href="https://m.youtube.com/watch?v=UtvWkrEPId4" target="blank">
-</a>
+## [Video](https://m.youtube.com/watch?v=UtvWkrEPId4)
 
 ## Instruction for Use
 
