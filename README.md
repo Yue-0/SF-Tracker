@@ -10,7 +10,7 @@ Authors: [Yue Lin](https://github.com/Yue-0), Yang Liu, Pingping Zhang, [Xin Che
 
 ## Video
 
-https://github.com/Yue-0/SF-Tracker/assets/98451547/b0d80213-9b5e-4fec-a20e-c4929c28dfb8
+[Video](https://m.youtube.com/watch?v=UtvWkrEPId4)
 
 ## Instruction for Use
 
