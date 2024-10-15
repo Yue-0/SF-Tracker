@@ -10,7 +10,7 @@ Authors: [Yue Lin](https://github.com/Yue-0), Yang Liu, Pingping Zhang, [Xin Che
 
 ## Video
 
-[Video](https://m.youtube.com/watch?v=UtvWkrEPId4)
+https://m.youtube.com/watch?v=UtvWkrEPId4
 
 ## Instruction for Use
 
