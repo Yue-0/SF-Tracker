@@ -1,80 +1,36 @@
 # SF-Tracker
 
-__English__ | [简体中文](README_cn.md)
-
 ## Paper
 
 __Safety-First Tracker: A Trajectory Planning Framework for Omnidirectional Robot Tracking__. 
 Accepted by __IROS 2024__.
+
 Authors: [Yue Lin](https://github.com/Yue-0), Yang Liu, Pingping Zhang, [Xin Chen](https://github.com/chenxin-dlut), Dong Wang and Huchuan Lu.
 
-## [Video](https://m.youtube.com/watch?v=UtvWkrEPId4)
+## Video
 
-## Instruction for Use
+[![Safety-First Tracker](abstract.png)](https://m.youtube.com/watch?v=UtvWkrEPId4 "Video")
 
-The following code has been tested under Ubuntu20.04 & ROS-noetic.
+## Quick Start
 
-### 1. Clone
+This project needs to run under Ubuntu20.04 & ROS-noetic.
 
 ```shell
 git clone https://github.com/Yue-0/SF-Tracker.git
-cd SF-Tracker
+cd SF-Tracker && catkin_make
+source devel/setup.bash 
 ```
 
-### 2. Install Requirements
-
-```shell
-sudo apt update
-sudo apt install lib-eigen3-dev
-sudo apt install ros-noetic-nav-msgs
-sudo apt install ros-noetic-sensor-msgs
-sudo apt install ros-noetic-geometry-msgs
-sudo apt install ros-noetic-vision-opencv
-```
-
-We use NLopt to solve numerical optimization problems. If you do not have NLopt installed, please follow the steps below to compile NLopt from source:
-
-```shell
-cd src/sf_tracker/include
-git clone https://github.com/stevengj/nlopt.git
-cd nlopt
-mkdir build
-cd build
-cmake ..
-make
-sudo make install
-cd ../../../../..
-```
-
-### 3. Build SF-Tracker
-
-```shell
-catkin_make
-source devel/setup.bash
-```
-
-### 4. Using SF-Tracker in Simulation Environment
-
-We use Gazebo for simulation and need to install simulation requirements first.
-
-```shell
-sudo apt install gazobo11
-sudo apt install ros-noetic-xacro
-sudo apt install ros-noetic-controller-manager
-sudo apt install ros-noetic-robot-state-publisher
-sudo apt install ros-noetic-joint-state-publisher
-```
-
-To start the launch file to run the simulation, you need to publish the position of the target via `2D Nav Goal` in RVIZ.
+Run the simulation:
 
 ```shell
 roslaunch simulator tracking.launch
 ```
 
-### 5. Using SF-Tracker on Real-world Robot
+Use `2D Pose Estimate` to publish the target's position.
 
-See [real_world](src/real_world/README.md) package.
+You can change the value of `gui` in line 7 of [sim.launch](src/simulator/launch/sim.launch) to `true` to display Gazobo.
 
-### 6. Modify Hyperparameters
+## Acknowledgements
 
-All hyperparameters of SF-Tracker are defined in the file [planning.launch](src/sf_tracker/launch/planning.launch).
+We use [LBFGS-Lite](https://github.com/ZJU-FAST-Lab/LBFGS-Lite) to solve numerical optimization problems.

@@ -8,15 +8,12 @@
 
 typedef sensor_msgs::LaserScan LaserScan;
 
-void init(int* pl, int* pf, LaserScan::ConstPtr data, float crop)
+void inline init(int* pl, int* pf, LaserScan::ConstPtr data, float crop)
 {
-    if(!*pl)
-    {
-        int len = data->ranges.size();
-        int f = len * crop;
-        *pl = len - f;
-        *pf = f >> 1;
-    }
+    int len = data->ranges.size();
+    int f = len * crop;
+    *pl = len - f;
+    *pf = f >> 1;
 }
 
 LaserScan filter(LaserScan::ConstPtr data, int len, int f)
@@ -44,7 +41,7 @@ int main(int argc, char* argv[])
     ros::Subscriber subscriber = handle.subscribe<LaserScan>(
         argv[2], 1, [&](LaserScan::ConstPtr data)
         {
-            init(&len, &f, data, crop);
+            if(!len) init(&len, &f, data, crop);
             publisher.publish(filter(data, len, f));
         }
     );

@@ -7,7 +7,7 @@
     <include file="$(find sf_tracker)/launch/planning.launch" />
 
     <!-- Fake tracker -->
-    <node name="tracker" pkg="simulator" type="target" >
+    <node name="tracker" pkg="simulator" type="target" output="screen" >
         <param name="velocity" value="1.5" type="double" />
         <param name="initial_x" value="0.5" type="double" />
         <param name="initial_y" value="1.0" type="double" />

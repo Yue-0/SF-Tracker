@@ -6,7 +6,7 @@
 
     <license>Apache-2.0</license>
     <maintainer email="yuelin@mail.dlut.edu.cn">Yue Lin</maintainer>
-    <url type="website">https://github.com/Yue-0/SF-Tracker/tree/main/src/real_world</url>
+    <url type="website">https://github.com/Yue-0/SF-Tracker</url>
 
     <buildtool_depend>catkin</buildtool_depend>
 

@@ -67,7 +67,10 @@
         "variant": "cpp",
         "csignal": "cpp",
         "shared_mutex": "cpp",
-        "eigen": "cpp"
+        "eigen": "cpp",
+        "filesystem": "cpp",
+        "queue": "cpp",
+        "*.ipp": "cpp"
     },
     "python.autoComplete.extraPaths": [
         "${workspaceFolder}/devel/lib/python3/dist-packages"

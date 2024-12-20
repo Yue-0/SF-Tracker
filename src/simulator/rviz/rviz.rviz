@@ -43,7 +43,7 @@ Visualization Manager:
       Class: rviz/Path
       Color: 25; 255; 0
       Enabled: true
-      Head Diameter: 0.30000001192092896
+      Head Diameter: 0.10000000149011612
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
       Line Style: Billboards
@@ -53,12 +53,12 @@ Visualization Manager:
         X: 0
         Y: 0
         Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
+      Pose Color: 252; 233; 79
+      Pose Style: Arrows
       Queue Size: 10
       Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
+      Shaft Diameter: 0.05000000074505806
+      Shaft Length: 0.20000000298023224
       Topic: /trajectory
       Unreliable: false
       Value: true
@@ -153,7 +153,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 15.21731185913086
+      Distance: 12.098332405090332
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -161,9 +161,9 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 1.7722055912017822
-        Y: 2.298527956008911
-        Z: -2.900073766708374
+        X: 1.0807521343231201
+        Y: 1.004907488822937
+        Z: -2.1871843338012695
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false

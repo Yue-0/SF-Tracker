@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(sf_tracker)
 
-find_package(NLopt REQUIRED)
+# Compile as C++14, enable O3 optimization
+add_compile_options(-std=c++14)
+set(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall")
+
+# Find catkin macros and libraries
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
@@ -13,29 +18,31 @@ find_package(catkin REQUIRED COMPONENTS
     geometry_msgs
 )
 
+# Catkin specific configuration
 catkin_package()
 
+# Specify additional locations of header files
 include_directories(
     include
-    ${NLopt_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
     ${OpenCV_INCLUDE_DIRS}
 )
 
-add_executable(pp src/trajectory.cpp)
-add_executable(op src/orientation.cpp)
+# Declare C++ executables
 add_executable(costmap src/costmap.cpp)
+add_executable(planner src/planner.cpp)
+add_executable(control src/control.cpp)
 
-target_link_libraries(op
-    ${NLOPT_LIBRARIES}
-    ${catkin_LIBRARIES}
-)
-target_link_libraries(pp
-    ${OpenCV_LIBS}
-    ${NLOPT_LIBRARIES}
-    ${catkin_LIBRARIES}
-)
+# Specify libraries to link a library or executable target against
 target_link_libraries(costmap
+    ${OpenCV_LIBS}
+    ${catkin_LIBRARIES}
+)
+target_link_libraries(planner
+    ${OpenCV_LIBS}
+    ${catkin_LIBRARIES}
+)
+target_link_libraries(control
     ${OpenCV_LIBS}
     ${catkin_LIBRARIES}
 )

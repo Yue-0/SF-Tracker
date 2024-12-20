@@ -2,9 +2,6 @@
     <!-- Map size -->
     <arg name="size" value="10.0" />
 
-    <!-- Control intervel -->
-    <arg name="dt" value="0.05" />
-
     <!-- Frames -->
     <arg name="map_frame" value="map" />
     <arg name="odom_frame" value="odom" />
@@ -14,11 +11,21 @@
           args="-$(arg size) -$(arg size) 0 0 0 0 
                 $(arg robot_frame) $(arg map_frame) 100"/>
 
+    <!-- Time interval -->
+    <arg name="dt" default="0.1" />
+
+    <!-- Kinetic limits -->
+    <arg name="max_vel" default="2.5" />
+    <arg name="max_acc" default="1.5" />
+    <arg name="max_omega" default="1.5" />
+    <arg name="max_alpha" default="1.0" />
+
     <!-- Costmap -->
     <node name="costmap" pkg="sf_tracker" type="costmap" output="screen" >
-        <param name="scale" value="0.05" type="double" />
-        <param name="update_rate" value="20" type="int" />
+        <param name="scale" value="0.01" type="double" />
+        <param name="update_rate" value="10" type="int" />
         <param name="expansion" value="0.4" type="double" />
+        <param name="attenuation" value="0.25" type="double" />
         <param name="width" value="$(arg size)" type="double" />
         <param name="height" value="$(arg size)" type="double" />
         <param name="map_frame" value="$(arg map_frame)" type="string" />
@@ -26,45 +33,54 @@
         <param name="lidar_frame" value="$(arg lidar_frame)" type="string" />
     </node>
 
-    <!-- Path planner -->
-    <node name="path_planner" pkg="sf_tracker" type="pp" output="screen" >
-        <!-- Kinetic limit -->
-        <param name="max_vel" value="2.5" type="double" />
-        <param name="max_acc" value="1.5" type="double" />
+    <!-- Planner -->
+    <node name="planner" pkg="sf_tracker" type="planner" output="screen" >
         
-        <!-- Hyperparameters -->
+        <!-- Kinetic limits -->
+        <param name="max_vel" value="$(arg max_vel)" type="double" />
+        <param name="max_acc" value="$(arg max_acc)" type="double" />
+        <param name="max_omega" value="$(arg max_omega)" type="double" />
+        <param name="max_alpha" value="$(arg max_alpha)" type="double" />
+
+        <!-- Hyper-parameters of both planners -->
         <param name="delta_t" value="$(arg dt)" type="double" />
+        <param name="replan_interval" value="0.1" type="double" />
+        
+        <!-- Hyper-parameters of trajectory planner -->
         <param name="safe_distance" value="0.4" type="double" />
         <param name="lambda_safety" value="1e2" type="double" />
         <param name="lambda_smoothness" value="1e-6" type="double" />
         <param name="lambda_feasibility" value="1e-2" type="double" />
+        <param name="observation_distance" value="0.5" type="double" />
 
-        <!-- Frame name -->
-        <param name="map_frame" value="$(arg map_frame)" type="string" />
-        <param name="odom_frame" value="$(arg odom_frame)" type="string" />
-
-        <!-- Other settings -->
-        <param name="replan_interval" value="0.1" type="double" />
-        <param name="solution_time_limit" value="0.01" type="double" />
-    </node>
-
-    <!-- Orientation planner -->
-    <node name="orientation_planner" pkg="sf_tracker" type="op" output="screen" >
-        <!-- Kinetic limit -->
-        <param name="max_omega" value="1.5" type="double" />
-        <param name="max_alpha" value="1.0" type="double" />
-
-        <!-- Hyperparameters -->
-        <param name="delta_t" value="$(arg dt)" type="double" />
+        <!-- Hyper-parameters of orientation planner -->
         <param name="mu_visibility" value="100" type="double" />
         <param name="mu_smoothness" value="0.01" type="double" />
         <param name="mu_feasibility" value="0.1" type="double" />
 
         <!-- Frame name -->
-        <param name="trajectory_frame" value="$(arg map_frame)" type="string" />
+        <param name="map_frame" value="$(arg map_frame)" type="string" />
+        <param name="odom_frame" value="$(arg odom_frame)" type="string" />
 
-        <!-- Other settings -->
-        <param name="observation_dis" value="0.5" type="double" />
-        <param name="solution_time_limit" value="0.01" type="double" />
     </node>
+
+    <!-- Controller -->
+    <node name="control" pkg="sf_tracker" type="control" output="screen" >
+        
+        <!-- Hyper-parameters -->
+        <param name="delta_t" value="$(arg dt)" type="double" />
+        <param name="control_interval" value="0.02" type="double" />
+
+        <!-- Kinetic limits -->
+        <param name="max_vel" value="$(arg max_vel)" type="double" />
+        <param name="max_acc" value="$(arg max_acc)" type="double" />
+        <param name="max_omega" value="$(arg max_omega)" type="double" />
+        <param name="max_alpha" value="$(arg max_alpha)" type="double" />
+
+        <!-- Frame name -->
+        <param name="map_frame" value="$(arg map_frame)" type="string" />
+        <param name="odom_frame" value="$(arg odom_frame)" type="string" />
+
+    </node>
+
 </launch>
