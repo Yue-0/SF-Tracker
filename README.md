@@ -9,7 +9,7 @@ Authors: [Yue Lin](https://github.com/Yue-0), Yang Liu, Pingping Zhang, [Xin Che
 
 ## Video
 
-[![Safety-First Tracker](abstract.png)](https://m.youtube.com/watch?v=UtvWkrEPId4 "Video")
+https://github.com/user-attachments/assets/a8feecc0-e678-453f-9f09-61cce6f2eb47
 
 ## Quick Start
 
