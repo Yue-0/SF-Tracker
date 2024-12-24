@@ -15,7 +15,7 @@ template <typename type> inline type pow2(type x) {return x * x;}
 template <typename type> 
 inline double distance(type x1, type y1, type x2, type y2)
 {
-    return std::sqrt(pow2(x1 - x2) + pow2(y1 - y2));
+    return std::hypot(x1 - x2, y1 - y2);
 }
 
 inline double clip(double rad)
