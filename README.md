@@ -2,7 +2,7 @@
 
 ## Paper
 
-__Safety-First Tracker: A Trajectory Planning Framework for Omnidirectional Robot Tracking__. 
+[__Safety-First Tracker: A Trajectory Planning Framework for Omnidirectional Robot Tracking__.](https://ieeexplore.ieee.org/abstract/document/10802592) 
 Accepted by __IROS 2024__.
 
 Authors: [Yue Lin](https://github.com/Yue-0), Yang Liu, Pingping Zhang, [Xin Chen](https://github.com/chenxin-dlut), Dong Wang and Huchuan Lu.
