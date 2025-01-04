@@ -40,7 +40,7 @@ namespace astar
         std::vector<double> g(W * H, INF);
         std::vector<int> parent(W * H, -1);
         std::vector<bool> visited(W * H, false);
-        std::priority_queue<std::pair<int, int>> queue;
+        std::priority_queue<std::pair<double, int>> queue;
 
         /* Variables */
         int x, y, x0, y0, idx, index = encode(start.x, start.y, W);

@@ -20,15 +20,15 @@ LaserScan filter(LaserScan::ConstPtr data, int len, int f)
 {
     LaserScan ls = *data;
     std::vector<float> ranges(len), intensities(len);
-	for(int angle = 0; angle < len; angle++)
-	{
-		ranges[angle] = data->ranges[angle + f];
-		intensities[angle] = data->intensities[angle + f];
-	}
-	ls.ranges = ranges;
-	ls.intensities = intensities;
-	ls.angle_min += f * ls.angle_increment;
-	ls.angle_max = ls.angle_min + (len - 1) * ls.angle_increment;
+    for(int angle = 0; angle < len; angle++)
+    {
+        ranges[angle] = data->ranges[angle + f];
+        intensities[angle] = data->intensities[angle + f];
+    }
+    ls.ranges = ranges;
+    ls.intensities = intensities;
+    ls.angle_min += f * ls.angle_increment;
+    ls.angle_max = ls.angle_min + (len - 1) * ls.angle_increment;
     return ls;
 }
 
@@ -45,5 +45,5 @@ int main(int argc, char* argv[])
             publisher.publish(filter(data, len, f));
         }
     );
-	return ros::spin(), 0;
+    return ros::spin(), 0;
 }
