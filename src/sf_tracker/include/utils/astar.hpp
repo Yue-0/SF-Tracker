@@ -78,7 +78,7 @@ namespace astar
                 idx = encode(x, y, W);
                 
                 /* Determine the legitimacy of the extension point */
-                if(y < 0 || y >= H || x < 0 || x >= W ||  
+                if(x < 0 || x >= W || y < 0 || y >= H ||  
                    !map.at<uchar>(y, x) || visited[idx])
                     continue;
                 
