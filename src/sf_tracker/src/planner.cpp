@@ -114,7 +114,7 @@ namespace sf_tracker
             /* Linear interpolation */
             int x1 = x0, y1 = y0;
             int x2 = x1 + 1, y2 = y1 + 1;
-            float u = x0 - x1, v = y1 - y0;
+            float u = x0 - x1, v = y0 - y1;
             float u_ = 1. - u, v_ = 1. - v;
             double sqr = std::sqrt(
                 + u * v * esdf.at<float>(y2, x2)

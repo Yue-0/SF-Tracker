@@ -29,8 +29,6 @@ roslaunch simulator tracking.launch
 
 Use `2D Pose Estimate` to publish the target's position.
 
-You can change the value of `gui` in line 7 of [sim.launch](src/simulator/launch/sim.launch) to `true` to display Gazobo.
-
 ## Acknowledgements
 
 We use [LBFGS-Lite](https://github.com/ZJU-FAST-Lab/LBFGS-Lite) to solve numerical optimization problems.
