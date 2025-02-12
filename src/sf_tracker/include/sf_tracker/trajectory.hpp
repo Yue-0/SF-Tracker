@@ -1,6 +1,6 @@
 /* @author: YueLin */
 
-#include "utils/lbfgs.hpp"
+#include "utils/lbfgs"
 #include "utils/bspline.hpp"
 #include "sf_tracker/path.hpp"
 

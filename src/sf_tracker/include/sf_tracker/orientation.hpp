@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "utils/lbfgs.hpp"
+#include "utils/lbfgs"
 #include "utils/bspline.hpp"
 
 namespace sf_tracker

@@ -13,7 +13,7 @@ https://github.com/user-attachments/assets/a8feecc0-e678-453f-9f09-61cce6f2eb47
 
 ## Quick Start
 
-This project needs to run under Ubuntu20.04 & ROS-noetic.
+In Ubuntu20.04 & ROS-noetic:
 
 ```shell
 git clone https://github.com/Yue-0/SF-Tracker.git
