@@ -17,7 +17,9 @@ In Ubuntu20.04 & ROS-noetic:
 
 ```shell
 git clone https://github.com/Yue-0/SF-Tracker.git
-cd SF-Tracker && catkin_make
+cd SF-Tracker
+git checkout e3ce5c7
+catkin_make
 source devel/setup.bash 
 ```
 
@@ -27,7 +29,7 @@ Run the simulation:
 roslaunch simulator tracking.launch
 ```
 
-Use `2D Pose Estimate` to publish the target's position.
+Use `2D Nav Goal` (or `2D Pose Estimate`) to publish the target's position.
 
 ## Acknowledgements
 
