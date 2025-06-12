@@ -18,7 +18,6 @@ In Ubuntu20.04 & ROS-noetic:
 ```shell
 git clone https://github.com/Yue-0/SF-Tracker.git
 cd SF-Tracker
-git checkout e3ce5c7
 catkin_make
 source devel/setup.bash 
 ```

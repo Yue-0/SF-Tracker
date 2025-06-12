@@ -51,7 +51,8 @@ int main(int argc, char* argv[])
     /* Wait tf */
     while(!listener.canTransform(odom_frame, map_frame, ros::Time(0)))
     {
-        if(time > 30) throw "Transfrom error!";
+        if(time > 10)
+            ROS_WARN("Wait for transfrom.");
         listener.waitForTransform(
             odom_frame, map_frame, ros::Time(0), ros::Duration(10)
         );

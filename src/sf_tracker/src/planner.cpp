@@ -401,11 +401,10 @@ int main(int argc, char* argv[])
             double sin = std::sin(yaw), cos = std::cos(yaw);
             double x = target.x - transform.getOrigin().x();
             double y = target.y - transform.getOrigin().y();
+            cv::Point2d t(x * cos + y * sin, y * cos - x * sin);
             
             /* Get navigation goal */
-            target.x = x * cos + y * sin;
-            target.y = y * cos - x * sin;
-            cv::Point2d goal = target * scale;
+            cv::Point2d goal = t * scale;
             cv::Point2d ob = goal - cv::Point2d(start.x, start.y);
             goal -= scale * planner1.dist / (std::sqrt(ob.dot(ob)) + O) * ob;
             end.x = std::round(std::max(std::min(goal.x, map.rows - 1.), 0.));
@@ -426,7 +425,7 @@ int main(int argc, char* argv[])
 
             /* Orientation planning */
             std::vector<double> bspline1 = planner2.plan(
-                trajectory, target, vel.z, acc.z
+                trajectory, t, vel.z, acc.z
             );
             std::vector<double> angles = bspline::trajectory(bspline1);
 
