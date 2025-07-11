@@ -87,9 +87,9 @@ namespace sf_tracker
         double length = 0;
         cv::Point2d p1, p2;
         const int N = keypoints.size();
-        const double STEP = max_vel / t;
         std::vector<cv::Point2d> points;
         points.push_back(p1 = keypoints[0]);
+        const double STEP = max_vel * t / scale;
         while(p < N)
         {
             if(next) p2 = keypoints[p];

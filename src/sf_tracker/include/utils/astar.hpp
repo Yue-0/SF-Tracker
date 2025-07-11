@@ -46,7 +46,7 @@ namespace astar
         int x, y, x0, y0, idx, index = encode(start.x, start.y, W);
 
         /* Push the first point into the queue */
-        visited[index] = !(g[index] = 0);
+        g[index] = 0;
         queue.push(std::make_pair(-f(0, start.x, start.y, goal), index));
 
         /* Main loop */
@@ -55,7 +55,12 @@ namespace astar
             /* Dequeue a point */
             index = queue.top().second;
             decode(index, &x0, &y0, W);
-            visited[index] = true; queue.pop();
+            queue.pop();
+
+            /* Check visited */
+            if(visited[index])
+                continue;
+            visited[index] = true;
 
             /* If found a path */
             if(x0 == goal.x && y0 == goal.y)
