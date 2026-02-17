@@ -1,7 +1,5 @@
 # Using SF-Tracker on Real-world Robot
 
-__English__ | [简体中文](README_cn.md)
-
 ## Real-world Robot
 
 Our algorithm supports ground omnidirectional robots, and the robot we use is the RoboMaster 2020 standard version AI robot, as shown in the figure below. We use an Intel NUC Phantom Canyon as the computing device, two single-line lidars for omnidirectional sensing, and an Intel Real-Sense D455 depth camera as the vision sensor.

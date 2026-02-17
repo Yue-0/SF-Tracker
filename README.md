@@ -30,6 +30,10 @@ roslaunch simulator tracking.launch
 
 Use `2D Nav Goal` (or `2D Pose Estimate`) to publish the target's position.
 
+## Run in real world:
+
+Please refer to the [real_world](src/real_world) package.
+
 ## Acknowledgements
 
 We use [LBFGS-Lite](https://github.com/ZJU-FAST-Lab/LBFGS-Lite) to solve numerical optimization problems.
